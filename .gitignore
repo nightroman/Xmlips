@@ -1,0 +1,8 @@
+*.dll
+*.suo
+*.user
+*.zip
+AssemblyInfo.cs
+bin
+obj
+Xmlips.psd1
