@@ -8,7 +8,7 @@ task New {
 	$xml = Read-Xml z.xml -Content $content
 	assert $xml.IsNew
 	assert $xml.IsChanged
-	Find-Xml e a атрибут $xml.DocumentElement
+	$null = Find-Xml e a атрибут $xml.DocumentElement
 	$xml.Save()
 	assert (Test-Path z.xml)
 
@@ -16,7 +16,7 @@ task New {
 	assert (!$xml.IsNew)
 	assert (!$xml.IsChanged)
 	$e = Get-Xml //e $xml
-	assert $e.a.Equals('атрибут')
+	equals $e.a 'атрибут'
 }
 
 task NewBom {
@@ -25,7 +25,7 @@ task NewBom {
 	$content = '<?xml version="1.0" encoding="utf-8"?><root/>'
 	$xml = Read-Xml z.xml -Content $content
 	$xml.Save()
-	assert ((Get-Item z.xml).Length -eq ($content.Length + 6))
+	equals (Get-Item z.xml).Length ($content.Length + 6L)
 }
 
 task NewNoBom {
@@ -34,7 +34,7 @@ task NewNoBom {
 	$content = '<root/>'
 	$xml = Read-Xml z.xml -Content $content
 	$xml.Save()
-	assert ((Get-Item z.xml).Length -eq ($content.Length + 1))
+	equals (Get-Item z.xml).Length ($content.Length + 1L)
 }
 
 task Add {
@@ -65,13 +65,13 @@ task Add {
 	Start-Sleep -Milliseconds 50
 	$xml.Save()
 	$time2 = (Get-Item z.xml).LastWriteTime
-	assert $time1.Equals($time2)
+	equals $time1 $time2
 }
 
 task Edit Add, {
 	$xml = Read-Xml z.xml
 	$node = Get-Xml '*/node[@id = 2]' $xml
-	assert $node.id.Equals('2')
+	equals $node.id '2'
 	$node.id = '3'
 	$xml.Save()
 
@@ -87,7 +87,7 @@ task Edit Add, {
 task Remove Edit, {
 	$xml = Read-Xml z.xml
 	$node = Get-Xml '*/node[@id = 3]' $xml
-	assert $node.id.Equals('3')
+	equals $node.id '3'
 	Remove-Xml $node
 	$xml.Save()
 
@@ -106,16 +106,16 @@ task Fragment {
 <e2 a="1" t="e2"/>
 '@
 	$xml = Read-Xml z.xml -Fragment
-	assert $xml.Count.Equals(3)
+	equals $xml.Count 3
 
 	$r = Get-Xml 'self::*[@a=1]' $xml
-	assert $r.Count.Equals(2)
+	equals $r.Count 2
 
 	$r = Get-Xml '*[@a = "inner"]' $r
-	assert $r.OuterXml.Equals('<inner a="inner" />')
+	equals $r.OuterXml '<inner a="inner" />'
 
 	$r = Get-Xml 'self::e2' $xml
-	assert $r.OuterXml.Equals('<e2 a="1" t="e2" />')
+	equals $r.OuterXml '<e2 a="1" t="e2" />'
 }
 
 task Backup {
@@ -125,10 +125,10 @@ task Backup {
 	$xml.Save()
 
 	$xml = Read-Xml z.xml
-	assert $xml.InnerXml.Equals('<r><e a="1" /></r>')
+	equals $xml.InnerXml '<r><e a="1" /></r>'
 
 	$xml = Read-Xml z.xml.bak
-	assert $xml.InnerXml.Equals('<r />')
+	equals $xml.InnerXml '<r />'
 }
 
 task Clean {

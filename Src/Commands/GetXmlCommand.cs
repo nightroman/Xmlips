@@ -19,7 +19,7 @@ namespace Xmlips.Commands
 		[Parameter(Position = 0)]
 		public string XPath { get; set; }
 
-		[Parameter(Position = 1, ValueFromPipeline = true), AllowNull, AllowEmptyCollection]
+		[Parameter(Position = 1, ValueFromPipeline = true)]
 		public XmlNode[] Xml
 		{
 			get { return _Xml; }
@@ -165,6 +165,8 @@ namespace Xmlips.Commands
 
 		void ProcessItem(XmlNode xml)
 		{
+			if (xml == null) throw new PSArgumentNullException("Xml (item)");
+
 			if (Single)
 			{
 				WriteItem(xml.SelectSingleNode(XPath, _context));
@@ -178,10 +180,8 @@ namespace Xmlips.Commands
 
 		protected override void ProcessRecord()
 		{
-			if (!_XmlSet) throw new PSArgumentException("Parameter Xml is required.");
-
-			if (Xml == null)
-				return;
+			if (!_XmlSet) throw new PSArgumentException("Xml is required.");
+			if (Xml == null) return;
 
 			foreach (var item in Xml)
 				ProcessItem(item);

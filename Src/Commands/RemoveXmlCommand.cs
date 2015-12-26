@@ -11,15 +11,28 @@ namespace Xmlips.Commands
 	public sealed class RemoveXmlCommand : PSCmdlet
 	{
 		[Parameter(Position = 0, ValueFromPipeline = true)]
-		public XmlNode[] Xml { get; set; }
+		public XmlNode[] Xml
+		{
+			get { return _Xml; }
+			set
+			{
+				_Xml = value;
+				_XmlSet = true;
+			}
+		}
+		XmlNode[] _Xml;
+		bool _XmlSet;
 
 		protected override void ProcessRecord()
 		{
-			if (Xml == null)
-				return;
+			if (!_XmlSet) throw new PSArgumentException("Xml is required.");
+			if (Xml == null) return;
 
 			foreach(var node in Xml)
+			{
+				if (node == null) throw new PSArgumentNullException("Xml (item)");
 				node.ParentNode.RemoveChild(node);
+			}
 		}
 	}
 }

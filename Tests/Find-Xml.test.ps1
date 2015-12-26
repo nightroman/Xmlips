@@ -1,40 +1,54 @@
 
 Import-Module Xmlips
 
-task BadName {
+task BadTag {
 	($r = try {Find-Xml} catch {$_})
-	assert $r.FullyQualifiedErrorId.Equals('ArgumentNull,Xmlips.Commands.FindXmlCommand')
-	assert ($r -clike '*: Name')
+	equals $r.FullyQualifiedErrorId 'ArgumentNull,Xmlips.Commands.FindXmlCommand'
+	assert ($r -clike '*: Tag')
 
 	($r = try {Find-Xml ''} catch {$_})
-	assert $r.FullyQualifiedErrorId.Equals('ArgumentNull,Xmlips.Commands.FindXmlCommand')
-	assert ($r -clike '*: Name')
+	equals $r.FullyQualifiedErrorId 'ArgumentNull,Xmlips.Commands.FindXmlCommand'
+	assert ($r -clike '*: Tag')
 }
 
 task BadKey {
 	($r = try {Find-Xml e} catch {$_})
-	assert $r.FullyQualifiedErrorId.Equals('ArgumentNull,Xmlips.Commands.FindXmlCommand')
+	equals $r.FullyQualifiedErrorId 'ArgumentNull,Xmlips.Commands.FindXmlCommand'
 	assert ($r -clike '*: Key')
 
 	($r = try {Find-Xml e ''} catch {$_})
-	assert $r.FullyQualifiedErrorId.Equals('ArgumentNull,Xmlips.Commands.FindXmlCommand')
+	equals $r.FullyQualifiedErrorId 'ArgumentNull,Xmlips.Commands.FindXmlCommand'
 	assert ($r -clike '*: Key')
 }
 
 task BadValue {
 	($r = try {Find-Xml e k} catch {$_})
-	assert $r.FullyQualifiedErrorId.Equals('ArgumentNull,Xmlips.Commands.FindXmlCommand')
+	equals $r.FullyQualifiedErrorId 'ArgumentNull,Xmlips.Commands.FindXmlCommand'
 	assert ($r -clike '*: Value')
 
 	($r = try {Find-Xml e k ''} catch {$_})
-	assert $r.FullyQualifiedErrorId.Equals('ArgumentNull,Xmlips.Commands.FindXmlCommand')
+	equals $r.FullyQualifiedErrorId 'ArgumentNull,Xmlips.Commands.FindXmlCommand'
 	assert ($r -clike '*: Value')
 }
 
 task BadXml {
 	($r = try {Find-Xml e k v} catch {$_})
-	assert $r.FullyQualifiedErrorId.Equals('ArgumentNull,Xmlips.Commands.FindXmlCommand')
-	assert ($r -clike '*: Xml')
+	equals $r.FullyQualifiedErrorId 'Argument,Xmlips.Commands.FindXmlCommand'
+	equals "$r" 'Xml is required.'
+
+	($r = try {Find-Xml e k v @($null)} catch {$_})
+	equals $r.FullyQualifiedErrorId 'ArgumentNull,Xmlips.Commands.FindXmlCommand'
+	assert ($r -clike '*: Xml (item)')
+}
+
+task NoXml {
+	$r = $(
+		Find-Xml e k v @()
+		Find-Xml e k v $null
+		@() | Find-Xml e k v
+		$null | Find-Xml e k v
+	)
+	equals $r
 }
 
 task Find {
@@ -43,17 +57,17 @@ task Find {
 
 	# get existing and pipe to add missing
 	$r = Find-Xml e a 1 $xml | Find-Xml new new new
-	assert $r.OuterXml.Equals('<new new="new" />')
-	assert $xml.InnerXml.Equals('<e a="1"><new new="new" /></e>')
+	equals $r.OuterXml '<new new="new" />'
+	equals $xml.InnerXml '<e a="1"><new new="new" /></e>'
 
 	# add missing with apostrophe
 	$r = Find-Xml e a "'s" $xml
-	assert $r.OuterXml.Equals('<e a="''s" />')
+	equals $r.OuterXml '<e a="''s" />'
 
 	# add missing with quotation
 	$r = Find-Xml e a '"s' $xml
-	assert $r.OuterXml.Equals('<e a="&quot;s" />')
+	equals $r.OuterXml '<e a="&quot;s" />'
 
 	# 3+1 elements
-	assert $doc.InnerXml.Equals('<r><e a="1"><new new="new" /></e><e a="''s" /><e a="&quot;s" /></r>')
+	equals $doc.InnerXml '<r><e a="1"><new new="new" /></e><e a="''s" /><e a="&quot;s" /></r>'
 }

@@ -1,37 +1,39 @@
 
 Import-Module Xmlips
 
-task BadName {
+task BadTag {
 	($r = try {Add-Xml} catch {$_})
-	assert $r.FullyQualifiedErrorId.Equals('ArgumentNull,Xmlips.Commands.AddXmlCommand')
-	assert ($r -clike '*: Name')
+	equals $r.FullyQualifiedErrorId 'ArgumentNull,Xmlips.Commands.AddXmlCommand'
+	assert ($r -clike '*: Tag')
 
 	($r = try {Add-Xml ''} catch {$_})
-	assert $r.FullyQualifiedErrorId.Equals('ArgumentNull,Xmlips.Commands.AddXmlCommand')
-	assert ($r -clike '*: Name')
+	equals $r.FullyQualifiedErrorId 'ArgumentNull,Xmlips.Commands.AddXmlCommand'
+	assert ($r -clike '*: Tag')
 }
 
 task BadXml {
 	($r = try {Add-Xml e} catch {$_})
-	assert $r.FullyQualifiedErrorId.Equals('ArgumentNull,Xmlips.Commands.AddXmlCommand')
-	assert ($r -clike '*: Xml')
+	equals $r.FullyQualifiedErrorId 'Argument,Xmlips.Commands.AddXmlCommand'
+	equals "$r" 'Xml is required.'
 
-	($r = try {Add-Xml e $null} catch {$_})
-	assert $r.FullyQualifiedErrorId.Equals('ArgumentNull,Xmlips.Commands.AddXmlCommand')
-	assert ($r -clike '*: Xml')
+	($r = try {Add-Xml e @($null)} catch {$_})
+	equals $r.FullyQualifiedErrorId 'ArgumentNull,Xmlips.Commands.AddXmlCommand'
+	assert ($r -clike '*: Xml (item)')
 }
 
-task EmptyXml {
-	$r = Add-Xml e @()
-	assert ($null -eq $r)
-
-	$r = @() | Add-Xml e
-	assert ($null -eq $r)
+task NoXml {
+	$r = $(
+		Add-Xml e @()
+		Add-Xml e $null
+		@() | Add-Xml e
+		$null | Add-Xml e
+	)
+	equals $r
 }
 
 task Add {
 	$xml = [xml]'<r/>'
 	$r = Add-Xml e $xml.DocumentElement
-	assert $r.OuterXml.Equals('<e />')
-	assert $xml.InnerXml.Equals('<r><e /></r>')
+	equals $r.OuterXml '<e />'
+	equals $xml.InnerXml '<r><e /></r>'
 }

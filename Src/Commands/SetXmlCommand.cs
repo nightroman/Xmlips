@@ -15,7 +15,17 @@ namespace Xmlips.Commands
 		public string[] Attribute { get; set; }
 
 		[Parameter(Position = 1, ValueFromPipeline = true)]
-		public XmlElement[] Xml { get; set; }
+		public XmlElement[] Xml
+		{
+			get { return _Xml; }
+			set
+			{
+				_Xml = value;
+				_XmlSet = true;
+			}
+		}
+		XmlElement[] _Xml;
+		bool _XmlSet;
 
 		[Parameter]
 		public SwitchParameter Changed { get; set; }
@@ -31,6 +41,8 @@ namespace Xmlips.Commands
 
 		void ProcessItem(XmlElement xml)
 		{
+			if (xml == null) throw new PSArgumentNullException("Xml (item)");
+
 			for (int i = 0; i < Attribute.Length; i += 2)
 			{
 				var attribute = Attribute[i];
@@ -53,7 +65,8 @@ namespace Xmlips.Commands
 
 		protected override void ProcessRecord()
 		{
-			if (Xml == null) throw new PSArgumentNullException("Xml");
+			if (!_XmlSet) throw new PSArgumentException("Xml is required.");
+			if (Xml == null) return;
 
 			foreach (var item in Xml)
 				ProcessItem(item);

@@ -17,7 +17,7 @@ $SiteLink = @{ text = 'Project site:'; URI = 'https://github.com/nightroman/Xmli
 	The command creates and adds a new XML element to the specified.
 '@
 	parameters = @{
-		Name = @{
+		Tag = @{
 			required = $true
 			description = 'Specifies the new element name.'
 		}
@@ -66,7 +66,7 @@ $SiteLink = @{ text = 'Project site:'; URI = 'https://github.com/nightroman/Xmli
     specified key attribute value and added to the input parent.
 '@
 	parameters = @{
-		Name = @{
+		Tag = @{
 			required = $true
 			description = 'Specifies the element name.'
 		}
@@ -361,9 +361,10 @@ $SiteLink = @{ text = 'Project site:'; URI = 'https://github.com/nightroman/Xmli
 	This cmdlet removes the input nodes from their parents.
 '@
 	parameters = @{
-		Xml = @'
-		Specifies one or more nodes to be removed.
-'@
+		Xml = @{
+			required = $true
+			description = 'Specifies one or more nodes to be removed.'
+		}
 	}
 	inputs = @{
 		type = 'System.Xml.XmlNode'

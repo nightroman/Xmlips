@@ -12,26 +12,39 @@ namespace Xmlips.Commands
 	public sealed class AddXmlCommand : PSCmdlet
 	{
 		[Parameter(Position = 0)]
-		public string Name { get; set; }
+		public string Tag { get; set; }
 
 		[Parameter(Position = 2, ValueFromPipeline = true)]
-		public XmlElement[] Xml { get; set; }
+		public XmlElement[] Xml
+		{
+			get { return _Xml; }
+			set
+			{
+				_Xml = value;
+				_XmlSet = true;
+			}
+		}
+		XmlElement[] _Xml;
+		bool _XmlSet;
 
 		protected override void BeginProcessing()
 		{
-			if (string.IsNullOrEmpty(Name)) throw new PSArgumentNullException("Name");
+			if (string.IsNullOrEmpty(Tag)) throw new PSArgumentNullException("Tag");
 		}
 
 		void ProcessItem(XmlElement xml)
 		{
-			var elem = xml.OwnerDocument.CreateElement(Name);
+			if (xml == null) throw new PSArgumentNullException("Xml (item)");
+
+			var elem = xml.OwnerDocument.CreateElement(Tag);
 			xml.AppendChild(elem);
 			WriteObject(elem);
 		}
 
 		protected override void ProcessRecord()
 		{
-			if (Xml == null) throw new PSArgumentNullException("Xml");
+			if (!_XmlSet) throw new PSArgumentException("Xml is required.");
+			if (Xml == null) return;
 
 			foreach (var item in Xml)
 				ProcessItem(item);

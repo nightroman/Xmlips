@@ -1,46 +1,50 @@
 
 Import-Module Xmlips
 
-task OmittedXml {
-	($r = try {Get-Xml *} catch {$_})
-	assert $r.FullyQualifiedErrorId.Equals('Argument,Xmlips.Commands.GetXmlCommand')
-	assert $r.ToString().Equals('Parameter Xml is required.')
-}
-
-task NullXml {
-	$r = Get-Xml * $null
-	assert ($null -eq $r)
-}
-
-task EmptyXml {
-	$r = Get-Xml * @()
-	assert ($null -eq $r)
-}
-
 task NullXPath {
 	($r = try {Get-Xml $null $null} catch {$_})
-	assert $r.FullyQualifiedErrorId.Equals('ArgumentNull,Xmlips.Commands.GetXmlCommand')
+	equals $r.FullyQualifiedErrorId 'ArgumentNull,Xmlips.Commands.GetXmlCommand'
 	assert ($r -clike '*: XPath')
 }
 
 task EmptyXPath {
 	($r = try {Get-Xml '' $null} catch {$_})
-	assert $r.FullyQualifiedErrorId.Equals('ArgumentNull,Xmlips.Commands.GetXmlCommand')
+	equals $r.FullyQualifiedErrorId 'ArgumentNull,Xmlips.Commands.GetXmlCommand'
 	assert ($r -clike '*: XPath')
+}
+
+task BadXml {
+	($r = try {Get-Xml * @($null)} catch {$_})
+	equals $r.FullyQualifiedErrorId 'ArgumentNull,Xmlips.Commands.GetXmlCommand'
+	assert ($r -clike '*: Xml (item)')
+
+	($r = try {Get-Xml *} catch {$_})
+	equals $r.FullyQualifiedErrorId 'Argument,Xmlips.Commands.GetXmlCommand'
+	equals "$r" 'Xml is required.'
+}
+
+task NoXml {
+	$r = $(
+		Get-Xml * @()
+		Get-Xml * $null
+		@() | Get-Xml *
+		$null | Get-Xml *
+	)
+	equals $r
 }
 
 task BadProperty {
 	($r = try {Get-Xml * $null -Property 1} catch {$_})
-	assert "$r".Equals('Parameter Property item must be string or dictionary.')
+	equals "$r" 'Parameter Property item must be string or dictionary.'
 
 	($r = try {Get-Xml * $null -Property @{}} catch {$_})
-	assert "$r".Equals('Parameter Property dictionary must contain 1 key/value.')
+	equals "$r" 'Parameter Property dictionary must contain 1 key/value.'
 
 	($r = try {Get-Xml * $null -Property @{x = 1}} catch {$_})
-	assert "$r".Equals('Parameter Property dictionary value must be string or array with 2 items.')
+	equals "$r" 'Parameter Property dictionary value must be string or array with 2 items.'
 
 	($r = try {Get-Xml * $null -Property @{x = 1, 1}} catch {$_})
-	assert "$r".Equals('Parameter Property dictionary value second item must be Type.')
+	equals "$r" 'Parameter Property dictionary value second item must be Type.'
 }
 
 task BadPropertyType {
@@ -61,25 +65,25 @@ task XmlAndSigle {
 
 	# parameter
 	$r = Get-Xml '*/node[@attr = $attr]' $xml
-	assert $r.Count.Equals(2)
-	assert $r[0].'#text'.Equals('Text 2')
-	assert $r[1].'#text'.Equals('Text 3')
+	equals $r.Count 2
+	equals $r[0].'#text' 'Text 2'
+	equals $r[1].'#text' 'Text 3'
 
 	# pipeline
 	$r = $xml | Get-Xml '*/node[@attr = $attr]'
-	assert $r.Count.Equals(2)
-	assert $r[0].'#text'.Equals('Text 2')
-	assert $r[1].'#text'.Equals('Text 3')
+	equals $r.Count 2
+	equals $r[0].'#text' 'Text 2'
+	equals $r[1].'#text' 'Text 3'
 
 	# single
 	$r = Get-Xml '*/node[@attr = $attr]' $xml -Single
-	assert $r.'#text'.Equals('Text 2')
+	equals $r.'#text' 'Text 2'
 
 	# array
 	$r = Get-Xml '*/node[@attr = $attr]' $xml, $xml -Single
-	assert $r.Count.Equals(2)
-	assert $r[0].'#text'.Equals('Text 2')
-	assert $r[1].'#text'.Equals('Text 2')
+	equals $r.Count 2
+	equals $r[0].'#text' 'Text 2'
+	equals $r[1].'#text' 'Text 2'
 }
 
 task ParameterNamespace {
@@ -87,7 +91,7 @@ task ParameterNamespace {
 	[xml]$xml = Get-Content ..\Src\Xmlips.csproj
 	$x = 'AssemblyInfo.cs'
 	($r = Get-Xml '//x:Compile[@Include = $x]' $xml -Namespace $namespace)
-	assert $r.Include.Equals($x)
+	equals $r.Include $x
 }
 
 task Property {
@@ -112,12 +116,12 @@ task Property {
 		@{downloads = '@downloads', [int]}
 	)
 	$r | Out-String
-	assert $r.Count.Equals(2)
-	assert $r[0].package.Equals('Package1')
-	assert $r[0].downloads.Equals(11)
+	equals $r.Count 2
+	equals $r[0].package 'Package1'
+	equals $r[0].downloads 11
 	assert ($r[0].date -is [DateTime])
-	assert $r[1].package.Equals('Package2')
-	assert $r[1].downloads.Equals(222)
+	equals $r[1].package 'Package2'
+	equals $r[1].downloads 222
 	assert ($r[1].date -is [DateTime])
 
 	$r = Get-Xml 'packages/package' $xml -Property @(
@@ -125,17 +129,17 @@ task Property {
 		@{versions = 'count(version)'}
 	)
 	$r | Out-String
-	assert $r.Count.Equals(2)
-	assert $r[0].versions.Equals(2.0)
-	assert $r[1].versions.Equals(3.0)
+	equals $r.Count 2
+	equals $r[0].versions 2.0
+	equals $r[1].versions 3.0
 
 	$p1 = 'string(@name)'
 	$p2 = 'count(version)'
 	$r = Get-Xml 'packages/package' $xml -Property $p1, $p2
 	$r | Out-String
-	assert $r.Count.Equals(2)
-	assert $r[0].$p2.Equals(2.0)
-	assert $r[1].$p2.Equals(3.0)
+	equals $r.Count 2
+	equals $r[0].$p2 2.0
+	equals $r[1].$p2 3.0
 }
 
 task BooleanProperty {
@@ -148,16 +152,16 @@ task BooleanProperty {
 
 	# bad
 	$r = Get-Xml //e $xml -Property @{a = '@a', [bool]}
-	assert $r[0].a.Equals($true)
-	assert $r[1].a.Equals($true) #!
+	equals $r[0].a $true
+	equals $r[1].a $true #!
 
 	# bad
 	$r = Get-Xml //e $xml -Property @{a = 'boolean(@a)'}
-	assert $r[0].a.Equals($true)
-	assert $r[1].a.Equals($true) #!
+	equals $r[0].a $true
+	equals $r[1].a $true #!
 
 	# good
 	$r = Get-Xml //e $xml -Property @{a = '@a = "true"'}
-	assert $r[0].a.Equals($true)
-	assert $r[1].a.Equals($false) #!
+	equals $r[0].a $true
+	equals $r[1].a $false #!
 }

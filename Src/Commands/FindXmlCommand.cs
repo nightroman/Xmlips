@@ -12,7 +12,7 @@ namespace Xmlips.Commands
 	public sealed class FindXmlCommand : PSCmdlet
 	{
 		[Parameter(Position = 0)]
-		public string Name { get; set; }
+		public string Tag { get; set; }
 
 		[Parameter(Position = 1)]
 		public string Key { get; set; }
@@ -21,31 +21,50 @@ namespace Xmlips.Commands
 		public string Value { get; set; }
 
 		[Parameter(Position = 3, ValueFromPipeline = true)]
-		public XmlElement Xml { get; set; }
+		public XmlElement[] Xml
+		{
+			get { return _Xml; }
+			set
+			{
+				_Xml = value;
+				_XmlSet = true;
+			}
+		}
+		XmlElement[] _Xml;
+		bool _XmlSet;
 
 		protected override void BeginProcessing()
 		{
-			if (string.IsNullOrEmpty(Name)) throw new PSArgumentNullException("Name");
+			if (string.IsNullOrEmpty(Tag)) throw new PSArgumentNullException("Tag");
 			if (string.IsNullOrEmpty(Key)) throw new PSArgumentNullException("Key");
 			if (string.IsNullOrEmpty(Value)) throw new PSArgumentNullException("Value");
 		}
 
-		protected override void ProcessRecord()
+		void ProcessItem(XmlElement xml)
 		{
-			if (Xml == null) throw new PSArgumentNullException("Xml");
+			if (xml == null) throw new PSArgumentNullException("Xml (item)");
 
-			var xpath = string.Format(null, "{0}[@{1} = $x]", Name, Key);
-			var node = Xml.SelectSingleNode(xpath, new SimpleXsltContext(Value));
+			var xpath = string.Format(null, "{0}[@{1} = $x]", Tag, Key);
+			var node = xml.SelectSingleNode(xpath, new SimpleXsltContext(Value));
 
 			if (node == null)
 			{
-				var elem = Xml.OwnerDocument.CreateElement(Name);
+				var elem = xml.OwnerDocument.CreateElement(Tag);
 				elem.SetAttribute(Key, Value);
-				Xml.AppendChild(elem);
+				xml.AppendChild(elem);
 				node = elem;
 			}
 
 			WriteObject(node);
+		}
+
+		protected override void ProcessRecord()
+		{
+			if (!_XmlSet) throw new PSArgumentException("Xml is required.");
+			if (Xml == null) return;
+
+			foreach (var item in Xml)
+				ProcessItem(item);
 		}
 	}
 }

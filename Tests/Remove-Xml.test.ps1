@@ -1,14 +1,24 @@
 
 Import-Module Xmlips
 
-task NullXml {
-	$r = Remove-Xml $null
-	assert ($null -eq $r)
+task BadXml {
+	($r = try {Remove-Xml} catch {$_})
+	equals $r.FullyQualifiedErrorId 'Argument,Xmlips.Commands.RemoveXmlCommand'
+	equals "$r" 'Xml is required.'
+
+	($r = try {Remove-Xml @($null)} catch {$_})
+	equals $r.FullyQualifiedErrorId 'ArgumentNull,Xmlips.Commands.RemoveXmlCommand'
+	assert ("$r" -clike '*: Xml (item)')
 }
 
-task EmptyXml {
-	$r = Remove-Xml @()
-	assert ($null -eq $r)
+task NoXml {
+	$r = $(
+		Remove-Xml @()
+		Remove-Xml $null
+		@() | Remove-Xml
+		$null | Remove-Xml
+	)
+	equals $r
 }
 
 task Remove {
@@ -17,17 +27,17 @@ task Remove {
 	# using parameter
 	$node = Get-Xml //e $xml -Single
 	Remove-Xml $node
-	assert $xml.InnerXml.Equals('<r><e a="2" /><e a="3" /><e a="4" /><e a="5" /></r>')
+	equals $xml.InnerXml '<r><e a="2" /><e a="3" /><e a="4" /><e a="5" /></r>'
 
 	# using pipeline
 	$nodes = Get-Xml '//e[@a > 3]' $xml
-	assert $nodes.Count.Equals(2)
+	equals $nodes.Count 2
 	$nodes | Remove-Xml
-	assert $xml.InnerXml.Equals('<r><e a="2" /><e a="3" /></r>')
+	equals $xml.InnerXml '<r><e a="2" /><e a="3" /></r>'
 
 	# using array
 	$nodes = Get-Xml //e $xml
-	assert $nodes.Count.Equals(2)
+	equals $nodes.Count 2
 	Remove-Xml $nodes
-	assert $xml.InnerXml.Equals('<r></r>')
+	equals $xml.InnerXml '<r></r>'
 }

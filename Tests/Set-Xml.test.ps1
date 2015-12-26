@@ -3,38 +3,40 @@ Import-Module Xmlips
 
 task BadAttribute {
 	($r = try {Set-Xml $null $null} catch {$_})
-	assert $r.FullyQualifiedErrorId.Equals('ArgumentNull,Xmlips.Commands.SetXmlCommand')
+	equals $r.FullyQualifiedErrorId 'ArgumentNull,Xmlips.Commands.SetXmlCommand'
 	assert ($r -clike '*: Attribute')
 
 	($r = try {Set-Xml @() $null} catch {$_})
-	assert $r.FullyQualifiedErrorId.Equals('Argument,Xmlips.Commands.SetXmlCommand')
-	assert "$r".Equals('Parameter Attribute must not be empty.')
+	equals $r.FullyQualifiedErrorId 'Argument,Xmlips.Commands.SetXmlCommand'
+	equals "$r" 'Parameter Attribute must not be empty.'
 
 	($r = try {Set-Xml a $null} catch {$_})
-	assert $r.FullyQualifiedErrorId.Equals('Argument,Xmlips.Commands.SetXmlCommand')
-	assert "$r".Equals('Parameter Attribute must contain even number of items.')
+	equals $r.FullyQualifiedErrorId 'Argument,Xmlips.Commands.SetXmlCommand'
+	equals "$r" 'Parameter Attribute must contain even number of items.'
 
 	($r = try {Set-Xml '', $v $null} catch {$_})
-	assert $r.FullyQualifiedErrorId.Equals('Argument,Xmlips.Commands.SetXmlCommand')
-	assert "$r".Equals('Parameter Attribute contains null or empty name.')
+	equals $r.FullyQualifiedErrorId 'Argument,Xmlips.Commands.SetXmlCommand'
+	equals "$r" 'Parameter Attribute contains null or empty name.'
 }
 
 task BadXml {
 	($r = try {Set-Xml x, x} catch {$_})
-	assert $r.FullyQualifiedErrorId.Equals('ArgumentNull,Xmlips.Commands.SetXmlCommand')
-	assert ($r -clike '*: Xml')
+	equals $r.FullyQualifiedErrorId 'Argument,Xmlips.Commands.SetXmlCommand'
+	equals "$r" 'Xml is required.'
 
-	($r = try {Set-Xml x, x $null} catch {$_})
-	assert $r.FullyQualifiedErrorId.Equals('ArgumentNull,Xmlips.Commands.SetXmlCommand')
-	assert ($r -clike '*: Xml')
+	($r = try {Set-Xml x, x @($null)} catch {$_})
+	equals $r.FullyQualifiedErrorId 'ArgumentNull,Xmlips.Commands.SetXmlCommand'
+	assert ($r -clike '*: Xml (item)')
 }
 
-task EmptyXml {
-	$r = Set-Xml x, x @()
-	assert ($null -eq $r)
-
-	$r = @() | Set-Xml x, x
-	assert ($null -eq $r)
+task NoXml {
+	$r = $(
+		Set-Xml x, x @()
+		Set-Xml x, x $null
+		@() | Set-Xml x, x
+		$null | Set-Xml x, x
+	)
+	equals $r
 }
 
 task Set {
@@ -51,7 +53,7 @@ task Set {
 
 	# array
 	$r = Get-Xml //e[@a=2] $xml
-	assert $r.Count.Equals(2)
+	equals $r.Count 2
 	Set-Xml a, 2 $r -Changed
 	assert (!$xml.IsChanged)
 
@@ -61,24 +63,24 @@ task Set {
 	$r = Get-Xml //e $xml -Single
 	$changed = Set-Xml a, -1 $r -Changed
 	assert ($xml.IsChanged)
-	assert ($r.a.Equals('-1'))
-	assert $changed.Attribute.Equals('a')
-	assert $changed.OldValue.Equals('1')
-	assert $changed.NewValue.Equals('-1')
-	assert $changed.Element.Equals($r)
+	equals $r.a '-1'
+	equals $changed.Attribute 'a'
+	equals $changed.OldValue '1'
+	equals $changed.NewValue '-1'
+	equals $changed.Element $r
 
 	# array, changed
 	$r = Get-Xml //e[@a=2] $xml
 	$changed = Set-Xml a, -2 $r -Changed
-	assert ($r[0].a.Equals('-2'))
-	assert ($r[1].a.Equals('-2'))
-	assert $r.Count.Equals(2)
+	equals $r[0].a '-2'
+	equals $r[1].a '-2'
+	equals $r.Count 2
 
 	# pipeline
 	$r = Get-Xml //e[@a=-2] $xml
 	$r | Set-Xml a, 2
-	assert ($r[0].a.Equals('2'))
-	assert ($r[1].a.Equals('2'))
+	equals $r[0].a '2'
+	equals $r[1].a '2'
 
 	Remove-Item z.xml
 }
