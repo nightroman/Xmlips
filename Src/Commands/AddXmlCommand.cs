@@ -14,7 +14,7 @@ namespace Xmlips.Commands
 		[Parameter(Position = 0)]
 		public string Tag { get; set; }
 
-		[Parameter(Position = 2, ValueFromPipeline = true)]
+		[Parameter(Position = 1, ValueFromPipeline = true)]
 		public XmlElement[] Xml
 		{
 			get { return _Xml; }
