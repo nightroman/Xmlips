@@ -1,5 +1,5 @@
 
-// Copyright (c) 2015 Roman Kuzmin
+// Copyright (c) 2015-2016 Roman Kuzmin
 // http://www.apache.org/licenses/LICENSE-2.0
 
 using System.Management.Automation;
@@ -40,22 +40,20 @@ namespace Xmlips.Commands
 			if (string.IsNullOrEmpty(Value)) throw new PSArgumentNullException("Value");
 		}
 
-		void ProcessItem(XmlElement xml)
+		XmlNode GetElement(XmlElement xml)
 		{
 			if (xml == null) throw new PSArgumentNullException("Xml (item)");
 
-			var xpath = string.Format(null, "{0}[@{1} = $x]", Tag, Key);
-			var node = xml.SelectSingleNode(xpath, new SimpleXsltContext(Value));
-
-			if (node == null)
+			foreach (XmlNode it in xml.ChildNodes)
 			{
-				var elem = xml.OwnerDocument.CreateElement(Tag);
-				elem.SetAttribute(Key, Value);
-				xml.AppendChild(elem);
-				node = elem;
+				if (it.Name == Tag && it.NodeType == XmlNodeType.Element && ((XmlElement)it).GetAttribute(Key) == Value)
+					return it;
 			}
 
-			WriteObject(node);
+			var elem = xml.OwnerDocument.CreateElement(Tag);
+			elem.SetAttribute(Key, Value);
+			xml.AppendChild(elem);
+			return elem;
 		}
 
 		protected override void ProcessRecord()
@@ -64,7 +62,7 @@ namespace Xmlips.Commands
 			if (Xml == null) return;
 
 			foreach (var item in Xml)
-				ProcessItem(item);
+				WriteObject(GetElement(item));
 		}
 	}
 }

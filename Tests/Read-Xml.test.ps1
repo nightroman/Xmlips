@@ -99,25 +99,6 @@ task Remove Edit, {
 '@)
 }
 
-task Fragment {
-	Set-Content z.xml @'
-<e1 a="1" t="e1"><inner a="inner"/></e1>
-<e1 a="2" t="e1"/>
-<e2 a="1" t="e2"/>
-'@
-	$xml = Read-Xml z.xml -Fragment
-	equals $xml.Count 3
-
-	$r = Get-Xml 'self::*[@a=1]' $xml
-	equals $r.Count 2
-
-	$r = Get-Xml '*[@a = "inner"]' $r
-	equals $r.OuterXml '<inner a="inner" />'
-
-	$r = Get-Xml 'self::e2' $xml
-	equals $r.OuterXml '<e2 a="1" t="e2" />'
-}
-
 task Backup {
 	Set-Content z.xml '<r/>'
 	$xml = Read-Xml z.xml -Backup

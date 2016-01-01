@@ -64,9 +64,17 @@ task Find {
 	$r = Find-Xml e a "'s" $xml
 	equals $r.OuterXml '<e a="''s" />'
 
+	# get existing just added
+	$r2 = Find-Xml e a "'s" $xml
+	equals $r2 $r
+
 	# add missing with quotation
 	$r = Find-Xml e a '"s' $xml
 	equals $r.OuterXml '<e a="&quot;s" />'
+
+	# add existing just added
+	$r2 = Find-Xml e a '"s' $xml
+	equals $r2 $r
 
 	# 3+1 elements
 	equals $doc.InnerXml '<r><e a="1"><new new="new" /></e><e a="''s" /><e a="&quot;s" /></r>'

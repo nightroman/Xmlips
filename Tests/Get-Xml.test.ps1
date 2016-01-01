@@ -86,11 +86,11 @@ task XmlAndSigle {
 	equals $r[1].'#text' 'Text 2'
 }
 
-task ParameterNamespace {
+task Namespace {
 	$namespace = @{x='http://schemas.microsoft.com/developer/msbuild/2003'}
 	[xml]$xml = Get-Content ..\Src\Xmlips.csproj
 	$x = 'AssemblyInfo.cs'
-	($r = Get-Xml '//x:Compile[@Include = $x]' $xml -Namespace $namespace)
+	$r = Get-Xml '//x:Compile[@Include = $x]' $xml -Namespace $namespace
 	equals $r.Include $x
 }
 

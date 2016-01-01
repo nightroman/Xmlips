@@ -66,7 +66,9 @@
     <Compile Include="AttributeChange.cs" />
     <Compile Include="BaseXsltContext.cs" />
     <Compile Include="Commands\AddXmlCommand.cs" />
+    <Compile Include="Commands\ExportXmlCommand.cs" />
     <Compile Include="Commands\FindXmlCommand.cs" />
+    <Compile Include="Commands\ImportXmlCommand.cs" />
     <Compile Include="Commands\ReadXmlCommand.cs" />
     <Compile Include="Commands\GetXmlCommand.cs" />
     <Compile Include="Commands\RemoveXmlCommand.cs" />
@@ -75,7 +77,6 @@
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="CmdletXsltContext.cs" />
     <Compile Include="PS.cs" />
-    <Compile Include="SimpleXsltContext.cs" />
     <Compile Include="XsltContextVariable.cs" />
   </ItemGroup>
   <ItemGroup />

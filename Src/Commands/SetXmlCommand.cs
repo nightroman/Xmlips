@@ -1,5 +1,5 @@
 
-// Copyright (c) 2015 Roman Kuzmin
+// Copyright (c) 2015-2016 Roman Kuzmin
 // http://www.apache.org/licenses/LICENSE-2.0
 
 using System.Collections;

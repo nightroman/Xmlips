@@ -33,7 +33,7 @@ task Meta -Inputs Release-Notes.md -Outputs Module\$ModuleName.psd1, Src\Assembl
 	$Version = Get-Version
 	$Project = 'https://github.com/nightroman/Xmlips'
 	$Summary = 'Xmlips - XML in PowerShell'
-	$Copyright = 'Copyright (c) 2015 Roman Kuzmin'
+	$Copyright = 'Copyright (c) 2015-2016 Roman Kuzmin'
 
 	Set-Content Module\$ModuleName.psd1 @"
 @{

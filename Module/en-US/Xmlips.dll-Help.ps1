@@ -56,6 +56,38 @@ $SiteLink = @{ text = 'Project site:'; URI = 'https://github.com/nightroman/Xmli
 	)
 }
 
+### Export-Xml command help
+@{
+	command = 'Export-Xml'
+	synopsis = 'Exports elements as fragments.'
+	description = @'
+	The cmdlet exports specified XML elements as fragments.
+	Exported elements may be imported later by Import-Xml.
+
+	The cmdlet may be used in order to save XML query results for later use.
+	Another use case is logging using XML format, in this case the switch
+	Append is normally used in order to add new data to logs effectively.
+'@
+	parameters = @{
+		Path = 'Specifies the destination file path.'
+		Xml = @{
+			required = $true
+			description = 'Specifies elements to be exported.'
+		}
+		Append = 'Tells to append data if the file exists.'
+	}
+	inputs = @(
+		@{
+			type = 'System.Xml.XmlElement'
+			description = 'XML elements.'
+		}
+	)
+	links = @(
+		@{ text = 'Import-Xml' }
+		$SiteLink
+	)
+}
+
 ### Find-Xml command help
 @{
 	command = 'Find-Xml'
@@ -226,6 +258,43 @@ $SiteLink = @{ text = 'Project site:'; URI = 'https://github.com/nightroman/Xmli
 	)
 }
 
+### Import-Xml command help
+@{
+	command = 'Import-Xml'
+	synopsis = 'Imports elements from a file or strings.'
+	description = @'
+	The command reads elements from the source with multiple root elements. The
+	result is a single element "root" which contains imported elements as child
+	nodes.
+'@
+	parameters = @{
+		Path = 'Specifies the source file path.'
+		Content = 'Specifies the content string(s).'
+	}
+	outputs = @(
+		@{
+			type = 'System.Xml.XmlElement'
+			description = 'An element "root" with imported elements.'
+		}
+	)
+	examples = @(
+		@{
+			code = {
+	# pandoc.exe --to=html outputs as XHTML, without --standalone it is not well-formed XML
+	$fragments = pandoc.exe --to=html README.md
+
+	# import and get all links, the namespace http://www.w3.org/1999/xhtml is not needed
+	Import-Xml -Content $fragments | Get-Xml //a
+			}
+		}
+	)
+	links = @(
+		@{ text = 'Read-Xml' }
+		@{ text = 'Export-Xml' }
+		$SiteLink
+	)
+}
+
 ### Set-Xml command help
 @{
 	command = 'Set-Xml'
@@ -320,19 +389,11 @@ $SiteLink = @{ text = 'Project site:'; URI = 'https://github.com/nightroman/Xmli
 		the changed document by Save(). The backup file name is the original
 		name with added ".bak".
 '@
-		Fragment = @'
-		Tells that the source file contains XML fragments instead of a
-		well-formed XML. In this case the cmdlet reads and returns nodes.
-'@
 	}
 	outputs = @(
 		@{
 			type = 'Xmlips.FileXmlDocument'
 			description = 'XmlDocument with extra members Save(), IsNew, IsChanged.'
-		}
-		@{
-			type = 'System.Xml.XmlNode'
-			description = 'XML nodes are returned if Fragment is specified.'
 		}
 	)
 	examples = @(
@@ -349,6 +410,7 @@ $SiteLink = @{ text = 'Project site:'; URI = 'https://github.com/nightroman/Xmli
 		}
 	)
 	links = @(
+		@{ text = 'Import-Xml' }
 		$SiteLink
 	)
 }
@@ -386,6 +448,7 @@ $SiteLink = @{ text = 'Project site:'; URI = 'https://github.com/nightroman/Xmli
 			}
 		}
 	)
+
 	links = @(
 		$SiteLink
 	)

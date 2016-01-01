@@ -37,6 +37,14 @@ It sets the specified attribute values.
 
 It removes the specified nodes.
 
+#### Export-Xml
+
+It exports elements as fragments.
+
+#### Import-Xml
+
+It reads elements as fragments.
+
 ****
 ## Get and Install
 

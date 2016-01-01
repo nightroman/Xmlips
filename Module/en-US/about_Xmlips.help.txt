@@ -34,5 +34,11 @@ LONG DESCRIPTION
     Remove-Xml
         It removes the specified nodes.
 
+    Export-Xml
+        It exports elements as fragments.
+
+    Import-Xml
+        It reads elements as fragments.
+
 SEE ALSO
     Project site: https://github.com/nightroman/Xmlips
