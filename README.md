@@ -64,4 +64,4 @@ Copy the directory *Xmlips* to a PowerShell module directory, see
 ***
 ## Examples
 
-- [Update-WebXml.ps1](https://raw.github.com/nightroman/Xmlips/master/Update-WebXml)
+- [Update-WebXml.ps1](https://raw.githubusercontent.com/nightroman/Xmlips/master/Examples/Update-WebXml.ps1)
