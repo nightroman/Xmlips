@@ -1,6 +1,5 @@
 
-Xmlips - XML in PowerShell
-==========================
+# Xmlips - XML in PowerShell
 
 The module provides cmdlets for basic operations on XML.
 
@@ -45,7 +44,7 @@ It exports elements as fragments.
 
 It reads elements as fragments.
 
-****
+***
 ## Get and Install
 
 Xmlips is distributed as the NuGet package [Xmlips](https://www.nuget.org/packages/Xmlips).
@@ -61,3 +60,8 @@ Copy the directory *Xmlips* to a PowerShell module directory, see
 `$env:PSModulePath`, normally like this:
 
     C:/Users/<User>/Documents/WindowsPowerShell/Modules/Xmlips
+
+***
+## Examples
+
+- [Update-WebXml.ps1](https://raw.github.com/nightroman/Xmlips/master/Update-WebXml)
