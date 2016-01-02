@@ -83,7 +83,7 @@ task PostBuild {
 task Clean {
 	Remove-Item -Force -Recurse -ErrorAction 0 `
 	Module\$ModuleName.psd1, "$ModuleName.*.nupkg",
-	z, Src\bin, Src\obj, Src\AssemblyInfo.cs, README.htm, Release-Notes.htm
+	z, Src\bin, Src\obj, README.htm, Release-Notes.htm
 }
 
 # Synopsis: Build help by Helps (https://github.com/nightroman/Helps).

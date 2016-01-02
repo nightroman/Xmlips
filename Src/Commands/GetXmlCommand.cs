@@ -116,6 +116,10 @@ namespace Xmlips.Commands
 
 		void WriteItem(XmlNode xml)
 		{
+			//_160102_015732
+			if (xml == null)
+				return;
+
 			if (Property == null)
 			{
 				WriteObject(xml);
@@ -151,7 +155,7 @@ namespace Xmlips.Commands
 					{
 						result = LanguagePrimitives.ConvertTo(result, info.Type);
 					}
-					catch(PSInvalidCastException e)
+					catch (PSInvalidCastException e)
 					{
 						throw new PSArgumentException(string.Format(null, @"Property name ""{0}"": {1}", info.Name, e.Message));
 					}
@@ -163,18 +167,32 @@ namespace Xmlips.Commands
 			WriteObject(ps);
 		}
 
+		static string _errProcessItem = "XPath problem? Ensure namespace prefixes are defined.";
 		void ProcessItem(XmlNode xml)
 		{
 			if (xml == null) throw new PSArgumentNullException("Xml (item)");
 
-			if (Single)
+			try
 			{
-				WriteItem(xml.SelectSingleNode(XPath, _context));
+				if (Single)
+				{
+					WriteItem(xml.SelectSingleNode(XPath, _context));
+				}
+				else
+				{
+					foreach (XmlNode node in xml.SelectNodes(XPath, _context))
+						WriteItem(node);
+				}
 			}
-			else
+			catch (ArgumentNullException e)
 			{
-				foreach (XmlNode node in xml.SelectNodes(XPath, _context))
-					WriteItem(node);
+				//_160102_022718
+				throw new InvalidOperationException(_errProcessItem, e);
+			}
+			catch (NullReferenceException e)
+			{
+				//_160102_013934
+				throw new InvalidOperationException(_errProcessItem, e);
 			}
 		}
 

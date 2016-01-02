@@ -165,3 +165,47 @@ task BooleanProperty {
 	equals $r[0].a $true
 	equals $r[1].a $false #!
 }
+
+# null node from SelectSingleNode()
+task _160102_015732 {
+	[xml]$xml = '<r/>'
+
+	#! was $null, $null
+	$r = Get-Xml //e $xml, $xml -Single
+	equals $r
+
+	#! used to fail
+	$r = Get-Xml //e $xml -Single -Property '@a'
+	equals $r
+}
+
+# bad ArgumentNullException instead of XPathException on using undefined prefixes
+task _160102_022718 {
+	[xml]$xml = '<r/>'
+
+	$err = 'XPath problem? Ensure namespace prefixes are defined.'
+
+	$r = try {Get-Xml //my:e $xml -Single} catch {$_}
+	equals $r.Exception.InnerException.GetType().Name ArgumentNullException
+	equals "$r" $err
+
+	$r = try {Get-Xml //my:e $xml} catch {$_}
+	equals $r.Exception.InnerException.GetType().Name ArgumentNullException
+	equals "$r" $err
+}
+
+# bad NullReferenceException instead of XPathException on using undefined prefixes
+task _160102_013934 {
+	[xml]$xml = '<r xmlns="ns1" xmlns:my="ns2"> <e a="ns1 a" my:a="ns2 a"/> </r>'
+	$e = $xml.r.e
+
+	$err = 'XPath problem? Ensure namespace prefixes are defined.'
+
+	$r = try {Get-Xml '@my:a' $e -Single} catch {$_}
+	equals $r.Exception.InnerException.GetType().Name NullReferenceException
+	equals "$r" $err
+
+	$r = try {Get-Xml '@my:a' $e} catch {$_}
+	equals $r.Exception.InnerException.GetType().Name NullReferenceException
+	equals "$r" $err
+}

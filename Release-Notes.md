@@ -1,6 +1,13 @@
 
 # Xmlips Release Notes
 
+## v0.1.1
+
+`Get-Xml`
+
+- Fixed null result issues with `-Single`.
+- Improved errors on using undefined prefixes in XPath.
+
 ## v0.1.0
 
 New cmdlets `Export-Xml` and `Import-Xml` are designed for XML fragments
