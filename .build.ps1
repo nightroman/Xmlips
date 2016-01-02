@@ -138,7 +138,7 @@ task Package Markdown, {
 # Synopsis: Make NuGet package.
 task NuGet Package, Version, {
 	$summary = @'
-XML in PowerShell.
+The module provides cmdlets for basic operations on XML in PowerShell v2.0 or newer.
 '@
 	$description = @"
 $summary
