@@ -1,6 +1,12 @@
 
 # Xmlips Release Notes
 
+## v0.2.0
+
+`Read-Xml` returns the root element instead of the document. Typical use cases
+show that this makes coding easier. Saving is done by the new cmdlet `Save-Xml`.
+The document, if needed, is available as the property `OwnerDocument`.
+
 ## v0.1.1
 
 `Get-Xml`

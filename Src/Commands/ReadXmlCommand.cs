@@ -3,17 +3,18 @@
 // http://www.apache.org/licenses/LICENSE-2.0
 
 using System.Management.Automation;
+using System.Xml;
 
 namespace Xmlips.Commands
 {
 	[Cmdlet(VerbsCommunications.Read, "Xml")]
-	[OutputType(typeof(FileXmlDocument))]
+	[OutputType(typeof(XmlElement))]
 	public sealed class ReadXmlCommand : PSCmdlet
 	{
 		[Parameter(Position = 0, Mandatory = true)]
 		public string Path { get; set; }
 
-		[Parameter]
+		[Parameter, ValidateNotNullOrEmpty]
 		public string Content { get; set; }
 
 		[Parameter]
@@ -22,7 +23,10 @@ namespace Xmlips.Commands
 		protected override void BeginProcessing()
 		{
 			Path = GetUnresolvedProviderPathFromPSPath(Path);
-			WriteObject(new FileXmlDocument(Path, Content, Backup));
+
+			var xml = new FileXmlDocument(Path, Content, Backup);
+
+			WriteObject(xml.DocumentElement);
 		}
 	}
 }

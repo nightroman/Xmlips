@@ -82,4 +82,4 @@ foreach($elem in Get-Xml //@web_id/.. $xml) {
 	}
 }
 
-$xml.Save()
+Save-Xml $xml

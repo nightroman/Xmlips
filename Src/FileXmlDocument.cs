@@ -53,7 +53,7 @@ namespace Xmlips
 			RemoveChangeHandlers();
 		}
 
-		public void Save()
+		internal void Save()
 		{
 			if (!IsChanged)
 				return;

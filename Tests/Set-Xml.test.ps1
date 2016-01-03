@@ -45,24 +45,25 @@ task Set {
 	## not changed on setting the same
 
 	$xml = Read-Xml z.xml
+	$doc = $xml.OwnerDocument
 
 	# single
-	$r = Get-Xml //e $xml -Single
+	$r = Get-Xml e $xml -Single
 	Set-Xml a, 1 $r -Changed
-	assert (!$xml.IsChanged)
+	assert (!$doc.IsChanged)
 
 	# array
-	$r = Get-Xml //e[@a=2] $xml
+	$r = Get-Xml e[@a=2] $xml
 	equals $r.Count 2
 	Set-Xml a, 2 $r -Changed
-	assert (!$xml.IsChanged)
+	assert (!$doc.IsChanged)
 
 	## changed on setting new
 
 	# single, changed
-	$r = Get-Xml //e $xml -Single
+	$r = Get-Xml e $xml -Single
 	$changed = Set-Xml a, -1 $r -Changed
-	assert ($xml.IsChanged)
+	assert $doc.IsChanged
 	equals $r.a '-1'
 	equals $changed.Attribute 'a'
 	equals $changed.OldValue '1'
@@ -70,14 +71,14 @@ task Set {
 	equals $changed.Element $r
 
 	# array, changed
-	$r = Get-Xml //e[@a=2] $xml
+	$r = Get-Xml e[@a=2] $xml
 	$changed = Set-Xml a, -2 $r -Changed
 	equals $r[0].a '-2'
 	equals $r[1].a '-2'
 	equals $r.Count 2
 
 	# pipeline
-	$r = Get-Xml //e[@a=-2] $xml
+	$r = Get-Xml e[@a=-2] $xml
 	$r | Set-Xml a, 2
 	equals $r[0].a '2'
 	equals $r[1].a '2'

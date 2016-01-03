@@ -1,21 +1,41 @@
 ﻿
 Import-Module Xmlips
 
+task BadContent {
+	($r = try {Read-Xml missing.xml -Content $null} catch {$_})
+	equals $r.FullyQualifiedErrorId 'ParameterArgumentValidationError,Xmlips.Commands.ReadXmlCommand'
+
+	($r = try {Read-Xml missing.xml -Content ''} catch {$_})
+	equals $r.FullyQualifiedErrorId 'ParameterArgumentValidationError,Xmlips.Commands.ReadXmlCommand'
+}
+
+task RootIsMissing {
+	($r = try {Read-Xml missing.xml -Content ' '} catch {$_})
+	equals "$r" 'Root element is missing.'
+	equals $r.FullyQualifiedErrorId 'System.Xml.XmlException,Xmlips.Commands.ReadXmlCommand'
+
+	Set-Content z.xml ''
+	($r = try {Read-Xml z.xml} catch {$_})
+	equals "$r" 'Root element is missing.'
+	equals $r.FullyQualifiedErrorId 'System.Xml.XmlException,Xmlips.Commands.ReadXmlCommand'
+	Remove-Item z.xml
+}
+
 task New {
 	if (Test-Path z.xml) {Remove-Item z.xml}
 	$content = '<root/>'
 
 	$xml = Read-Xml z.xml -Content $content
-	assert $xml.IsNew
-	assert $xml.IsChanged
-	$null = Find-Xml e a атрибут $xml.DocumentElement
-	$xml.Save()
+	assert $xml.OwnerDocument.IsNew
+	assert $xml.OwnerDocument.IsChanged
+	$null = Find-Xml e a атрибут $xml
+	Save-Xml $xml
 	assert (Test-Path z.xml)
 
 	$xml = Read-Xml z.xml -Content $content
-	assert (!$xml.IsNew)
-	assert (!$xml.IsChanged)
-	$e = Get-Xml //e $xml
+	assert (!$xml.OwnerDocument.IsNew)
+	assert (!$xml.OwnerDocument.IsChanged)
+	$e = Get-Xml e $xml
 	equals $e.a 'атрибут'
 }
 
@@ -24,7 +44,7 @@ task NewBom {
 
 	$content = '<?xml version="1.0" encoding="utf-8"?><root/>'
 	$xml = Read-Xml z.xml -Content $content
-	$xml.Save()
+	Save-Xml $xml
 	equals (Get-Item z.xml).Length ($content.Length + 6L)
 }
 
@@ -33,7 +53,7 @@ task NewNoBom {
 
 	$content = '<root/>'
 	$xml = Read-Xml z.xml -Content $content
-	$xml.Save()
+	Save-Xml $xml
 	equals (Get-Item z.xml).Length ($content.Length + 1L)
 }
 
@@ -41,16 +61,15 @@ task Add {
 	Set-Content z.xml '<root/>'
 
 	$xml = Read-Xml z.xml
-	assert (!$xml.IsChanged)
+	$doc = $xml.OwnerDocument
+	assert (!$doc.IsChanged)
 
-	$e = $xml.DocumentElement.AppendChild($xml.CreateElement('node'))
-	$e.SetAttribute('id', 1)
-	$e = $xml.DocumentElement.AppendChild($xml.CreateElement('node'))
-	$e.SetAttribute('id', 2)
+	Add-Xml node $xml | Set-Xml id, 1
+	Add-Xml node $xml | Set-Xml id, 2
 
-	assert $xml.IsChanged
-	$xml.Save()
-	assert (!$xml.IsChanged)
+	assert $doc.IsChanged
+	Save-Xml $xml
+	assert (!$doc.IsChanged)
 
 	assert (Get-Content z.xml | Out-String).Equals(@'
 <root>
@@ -63,17 +82,17 @@ task Add {
 	# not saved on no changes
 	$time1 = (Get-Item z.xml).LastWriteTime
 	Start-Sleep -Milliseconds 50
-	$xml.Save()
+	Save-Xml $xml
 	$time2 = (Get-Item z.xml).LastWriteTime
 	equals $time1 $time2
 }
 
 task Edit Add, {
 	$xml = Read-Xml z.xml
-	$node = Get-Xml '*/node[@id = 2]' $xml
+	$node = Get-Xml 'node[@id = 2]' $xml
 	equals $node.id '2'
 	$node.id = '3'
-	$xml.Save()
+	Save-Xml $xml
 
 	assert (Get-Content z.xml | Out-String).Equals(@'
 <root>
@@ -86,10 +105,10 @@ task Edit Add, {
 
 task Remove Edit, {
 	$xml = Read-Xml z.xml
-	$node = Get-Xml '*/node[@id = 3]' $xml
+	$node = Get-Xml 'node[@id = 3]' $xml
 	equals $node.id '3'
 	Remove-Xml $node
-	$xml.Save()
+	Save-Xml $xml
 
 	assert (Get-Content z.xml | Out-String).Equals(@'
 <root>
@@ -102,14 +121,14 @@ task Remove Edit, {
 task Backup {
 	Set-Content z.xml '<r/>'
 	$xml = Read-Xml z.xml -Backup
-	$null = Find-Xml e a 1 $xml.DocumentElement
-	$xml.Save()
+	$null = Find-Xml e a 1 $xml
+	Save-Xml $xml
 
 	$xml = Read-Xml z.xml
-	equals $xml.InnerXml '<r><e a="1" /></r>'
+	equals $xml.OuterXml '<r><e a="1" /></r>'
 
 	$xml = Read-Xml z.xml.bak
-	equals $xml.InnerXml '<r />'
+	equals $xml.OuterXml '<r />'
 }
 
 task Clean {

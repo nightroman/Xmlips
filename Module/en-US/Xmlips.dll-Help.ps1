@@ -289,8 +289,39 @@ $SiteLink = @{ text = 'Project site:'; URI = 'https://github.com/nightroman/Xmli
 		}
 	)
 	links = @(
-		@{ text = 'Read-Xml' }
 		@{ text = 'Export-Xml' }
+		$SiteLink
+	)
+}
+
+### Save-Xml command help
+@{
+	command = 'Save-Xml'
+	synopsis = 'Saves a document read by Read-Xml.'
+	description = @'
+	The cmdlet saves a document read by Read-Xml if it is changed.
+'@
+	parameters = @{
+		Xml = @{
+			required = $true
+			description = 'Any node of the document read by Read-Xml.'
+		}
+	}
+	examples = @(
+		@{
+			code = {
+	$xml = Read-Xml data.xml
+	...
+	Save-Xml $xml
+			}
+			remarks = @'
+	The example shows a typical scenario: an XML document is read from a file,
+	some operations are performed on returned $xml, and then Save-Xml is called.
+'@
+		}
+	)
+	links = @(
+		@{ text = 'Read-Xml' }
 		$SiteLink
 	)
 }
@@ -319,7 +350,7 @@ $SiteLink = @{ text = 'Project site:'; URI = 'https://github.com/nightroman/Xmli
 		Tells to set only changed values and return information about changes.
 
 		The same values are not set and the document is not changed. This may
-		avoid unnecessary saving of a document read by Read-Xml.
+		avoid unnecessary writing to disk by Save-Xml.
 
 		For each changed value an object describing the change is written.
 		The properties are Attribute, OldValue, NewValue, Element.
@@ -357,22 +388,20 @@ $SiteLink = @{ text = 'Project site:'; URI = 'https://github.com/nightroman/Xmli
 ### Read-Xml command help
 @{
 	command = 'Read-Xml'
-	synopsis = 'Reads an XML document or fragments from a file.'
+	synopsis = 'Reads a document and gets its root element.'
 	description = @'
-	The cmdlet reads an XML document from a file. The returned document watches for
-	changes. Its method Save() saves XML to the source file if the document is
-	changed.
+	The cmdlet reads an XML document from a file and returns its root element.
+	Use Save-Xml with any node of this document in order to save the changes.
+	Note that Save-Xml does not write to disk if the document is not changed.
 
-	The returned XmlDocument contains extra members:
-
-		Save()
-			Saves the changed document to the source file.
-
-		IsNew
-			Tells that the document is created from Content.
+	The document, if needed, can be obtained as the property OwnerDocument.
+	It is derived from XmlDocument and contains extra properties:
 
 		IsChanged
 			Tells that the document is changed.
+
+		IsNew
+			Tells that the document is created from Content.
 '@
 	parameters = @{
 		Path = @'
@@ -386,14 +415,14 @@ $SiteLink = @{ text = 'Project site:'; URI = 'https://github.com/nightroman/Xmli
 '@
 		Backup = @'
 		Tells to create a backup copy of the original source file on saving of
-		the changed document by Save(). The backup file name is the original
+		the changed document by Save-Xml. The backup file name is the original
 		name with added ".bak".
 '@
 	}
 	outputs = @(
 		@{
 			type = 'Xmlips.FileXmlDocument'
-			description = 'XmlDocument with extra members Save(), IsNew, IsChanged.'
+			description = 'XmlDocument with extra members IsNew, IsChanged.'
 		}
 	)
 	examples = @(
@@ -401,16 +430,16 @@ $SiteLink = @{ text = 'Project site:'; URI = 'https://github.com/nightroman/Xmli
 			code = {
 	$xml = Read-Xml data.xml
 	...
-	$xml.Save()
+	Save-Xml $xml
 			}
 			remarks = @'
 	The example shows a typical scenario: an XML document is read from a file,
-	some operations are performed on returned $xml, and then Save() is called.
+	some operations are performed on returned $xml, and then Save-Xml is called.
 '@
 		}
 	)
 	links = @(
-		@{ text = 'Import-Xml' }
+		@{ text = 'Save-Xml' }
 		$SiteLink
 	)
 }
@@ -428,10 +457,12 @@ $SiteLink = @{ text = 'Project site:'; URI = 'https://github.com/nightroman/Xmli
 			description = 'Specifies one or more nodes to be removed.'
 		}
 	}
+
 	inputs = @{
 		type = 'System.Xml.XmlNode'
 		description = 'XML nodes to be removed.'
 	}
+
 	examples = @(
 		@{
 			code = {

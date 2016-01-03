@@ -3,15 +3,13 @@
 
 The module provides cmdlets for basic operations on XML in PowerShell v2.0 or newer.
 
-#### Read-Xml
+#### Read-Xml, Save-Xml, Import-Xml, Export-Xml
 
-It reads an XML document from a file. The returned document watches for
-changes. Its method Save() saves XML to the source file if the document
-is changed. It optionally creates a backup copy or the original file.
+Cmdlets for reading and saving XML documents and fragments.
 
 #### Get-Xml
 
-It is similar to the built-in Select-Xml. Main differences:
+Similar to `Select-Xml`. Main differences:
 
 - input is nodes, paths are not supported
 - output is nodes or PSObject, not node info
@@ -20,29 +18,20 @@ It is similar to the built-in Select-Xml. Main differences:
 
 #### Find-Xml
 
-It gets a single element specified by its name, key attribute name, and
-unique value. If the element is not found then it is created with the
-specified key attribute value.
+Gets an element specified by its name, key attribute name, and unique value.
+If the element is not found then it is created with the key attribute value.
 
 #### Add-Xml
 
-It creates and adds a new element to the specified.
+Creates and adds a new element to the specified.
 
 #### Set-Xml
 
-It sets the specified attribute values.
+Sets the specified attribute values.
 
 #### Remove-Xml
 
-It removes the specified nodes.
-
-#### Export-Xml
-
-It exports elements as fragments.
-
-#### Import-Xml
-
-It reads elements as fragments.
+Removes the specified nodes.
 
 ***
 ## Get and Install

@@ -86,20 +86,11 @@ task Clean {
 	z, Src\bin, Src\obj, README.htm, Release-Notes.htm
 }
 
-# Synopsis: Build help by Helps (https://github.com/nightroman/Helps).
-task Help -Inputs (
-	Get-Item Src\Commands\*, Module\en-US\$ModuleName.dll-Help.ps1
-) -Outputs (
-	"$ModuleRoot\en-US\$ModuleName.dll-Help.xml"
-) {
-	. Helps.ps1
-	Convert-Helps Module\en-US\$ModuleName.dll-Help.ps1 $Outputs
-}
-
-# Synopsis: Build and test help.
-task TestHelp Help, {
+# Synopsis: Build and test help by https://github.com/nightroman/Helps
+task Help {
 	. Helps.ps1
 	Test-Helps Module\en-US\$ModuleName.dll-Help.ps1
+	Convert-Helps Module\en-US\$ModuleName.dll-Help.ps1 $ModuleRoot\en-US\$ModuleName.dll-Help.xml
 }
 
 # Synopsis: Convert markdown files to HTML.
@@ -200,4 +191,4 @@ task Test {
 }
 
 # Synopsis: Build, test and clean all.
-task . Build, Test, Test2, TestHelp, Clean
+task . Build, Test, Test2, Help, Clean

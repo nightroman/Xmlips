@@ -72,6 +72,7 @@
     <Compile Include="Commands\ReadXmlCommand.cs" />
     <Compile Include="Commands\GetXmlCommand.cs" />
     <Compile Include="Commands\RemoveXmlCommand.cs" />
+    <Compile Include="Commands\SaveXmlCommand.cs" />
     <Compile Include="Commands\SetXmlCommand.cs" />
     <Compile Include="FileXmlDocument.cs" />
     <Compile Include="GlobalSuppressions.cs" />
