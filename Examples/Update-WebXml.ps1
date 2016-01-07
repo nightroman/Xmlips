@@ -22,7 +22,7 @@
 	- Invoke-RestMethod is supposed to return a single JSON object
 	- The object fields are defined by space separated ../@web_data
 	- Fields are converted to the element attributes with same names
-	- Changes are returned as: Uri, Attribute, OldValue, NewValue
+	- Changes are returned as: web_id, Property, OldValue, NewValue
 
 	Later on remove or add new groups and items to be watched.
 
@@ -73,8 +73,8 @@ foreach($elem in Get-Xml //@web_id/.. $xml) {
 	foreach($name in $data) {
 		if ($change = Set-Xml $name, $web.$name $elem -Changed) {
 			[PSCustomObject]@{
-				Uri = $uri
-				Attribute = $change.Attribute
+				web_id = $elem.web_id
+				Property = $change.Attribute
 				OldValue = $change.OldValue
 				NewValue = $change.NewValue
 			}
