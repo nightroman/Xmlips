@@ -1,6 +1,12 @@
 
 # Xmlips Release Notes
 
+## v0.2.1
+
+`Add-Xml`: new parameter `Namespace`. Use case: add references or compile items
+to a project file. Example: *Examples/Add-ProjectReference.ps1*. Test: task
+`Add-ProjectReference` in *Tests/Add-Xml.test.ps1*.
+
 ## v0.2.0
 
 `Read-Xml` returns the root element instead of the document. Typical use cases

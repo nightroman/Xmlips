@@ -27,6 +27,9 @@ namespace Xmlips.Commands
 		XmlElement[] _Xml;
 		bool _XmlSet;
 
+		[Parameter]
+		public string Namespace { get; set; }
+
 		protected override void BeginProcessing()
 		{
 			if (string.IsNullOrEmpty(Tag)) throw new PSArgumentNullException("Tag");
@@ -36,7 +39,7 @@ namespace Xmlips.Commands
 		{
 			if (xml == null) throw new PSArgumentNullException("Xml (item)");
 
-			var elem = xml.OwnerDocument.CreateElement(Tag);
+			var elem = string.IsNullOrEmpty(Namespace) ? xml.OwnerDocument.CreateElement(Tag) : xml.OwnerDocument.CreateElement(Tag, Namespace);
 			xml.AppendChild(elem);
 			WriteObject(elem);
 		}

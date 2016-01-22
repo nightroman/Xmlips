@@ -3,11 +3,9 @@
 
 Cmdlets for basic operations on XML in PowerShell v2.0 or newer.
 
-The module focuses on using XML files as data storages in the most simple and
-effective ways in PowerShell. The main scenario is read, find, edit, and save
-if changed. Another scenario is logging, i.e. append elements to a file and
-read them later. The module may not support some advanced features assuming
-they are not typical in the covered scenarios.
+The module focuses on using XML files as data storages in simple and effective
+ways in PowerShell. The main scenario is read, find, edit, and save if changed.
+Another scenario is logging, i.e. append elements to files and read them later.
 
 #### Read-Xml, Save-Xml, Import-Xml, Export-Xml
 
@@ -56,7 +54,9 @@ Copy the directory *Xmlips* to a PowerShell module directory, see
     C:/Users/<User>/Documents/WindowsPowerShell/Modules/Xmlips
 
 ***
-## Example
+## Examples
 
+- [Add-ProjectReference.ps1](https://github.com/nightroman/Xmlips/blob/master/Examples/Add-ProjectReference)
+adds a reference to a Visual Studio project.
 - [Update-WebXml.ps1](https://github.com/nightroman/Xmlips/blob/master/Examples/Update-WebXml.ps1)
-illustrates a typical scenario: `Read-Xml`, `Get-Xml`, `Set-Xml`, `Save-Xml`.
+gets and updates the specified data from web.

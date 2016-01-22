@@ -25,6 +25,7 @@ $SiteLink = @{ text = 'Project site:'; URI = 'https://github.com/nightroman/Xmli
 			required = $true
 			description = 'Specifies the parent element.'
 		}
+		Namespace = 'The namespace URI of the element.'
 	}
 	inputs = @{
 		type = 'System.Xml.XmlElement'
