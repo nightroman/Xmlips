@@ -56,7 +56,7 @@ Copy the directory *Xmlips* to a PowerShell module directory, see
 ***
 ## Examples
 
-- [Add-ProjectReference.ps1](https://github.com/nightroman/Xmlips/blob/master/Examples/Add-ProjectReference)
+- [Add-ProjectReference.ps1](https://github.com/nightroman/Xmlips/blob/master/Examples/Add-ProjectReference.ps1)
 adds a reference to a Visual Studio project.
 - [Update-WebXml.ps1](https://github.com/nightroman/Xmlips/blob/master/Examples/Update-WebXml.ps1)
 gets and updates the specified data from web.
