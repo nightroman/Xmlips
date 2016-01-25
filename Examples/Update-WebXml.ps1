@@ -58,8 +58,8 @@ param(
 )
 
 #requires -version 3
-Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
+Set-StrictMode -Off
 
 Import-Module Xmlips
 $xml = Read-Xml $Path -Backup

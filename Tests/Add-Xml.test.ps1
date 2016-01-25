@@ -49,7 +49,7 @@ task Add-ProjectReference {
 	# simplified project sample
 	Set-Content z.csproj @'
 <?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003"/>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003"/>
 '@
 	# add System, ItemGroup should be added
 	../Examples/Add-ProjectReference.ps1 z.csproj System
@@ -65,7 +65,7 @@ task Add-ProjectReference {
 	# test expected content
 	equals ([IO.File]::ReadAllText("$BuildRoot\z.csproj")) @'
 <?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Xml" />

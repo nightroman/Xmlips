@@ -23,7 +23,6 @@ param(
 
 trap {$PSCmdlet.ThrowTerminatingError($_)}
 $ErrorActionPreference = 'Stop'
-Set-StrictMode -Version Latest
 
 $default = 'http://schemas.microsoft.com/developer/msbuild/2003'
 $namespace = @{x = $default}

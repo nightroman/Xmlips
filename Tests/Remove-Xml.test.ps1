@@ -41,3 +41,41 @@ task Remove {
 	Remove-Xml $nodes
 	equals $xml.InnerXml '<r></r>'
 }
+
+task RemoveChildNodes {
+	$xml = ([xml]@'
+<r a="1">
+	<e1/>
+	<e2/>
+	<e3/>
+</r>
+'@).DocumentElement
+
+	# cannot use ChildNodes as the parameter
+	($r = try { Remove-Xml $xml.ChildNodes } catch {$_})
+	equals $r.FullyQualifiedErrorId 'CannotConvertArgumentNoMessage,Xmlips.Commands.RemoveXmlCommand'
+
+	# can pipe but it will remove just the first
+	$xml.ChildNodes | Remove-Xml
+	equals $xml.ChildNodes.Count 2
+	equals $xml.FirstChild.Name e2
+
+	# use @() in order to convert ChildNodes to node array
+	@($xml.ChildNodes) | Remove-Xml
+	equals $xml.ChildNodes.Count 0
+
+	# final XML
+	equals $xml.OuterXml '<r a="1"></r>'
+}
+
+task RemoveChildNodesAndAttributes {
+	$xml = ([xml]@'
+<r a="1" b="2">
+	<e1/>
+	<e2/>
+</r>
+'@).DocumentElement
+
+	$xml.RemoveAll()
+	equals $xml.OuterXml '<r></r>'
+}
