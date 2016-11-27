@@ -10,11 +10,7 @@ task BadAttribute {
 	equals $r.FullyQualifiedErrorId 'Argument,Xmlips.Commands.SetXmlCommand'
 	equals "$r" 'Parameter Attribute must not be empty.'
 
-	($r = try {Set-Xml a $null} catch {$_})
-	equals $r.FullyQualifiedErrorId 'Argument,Xmlips.Commands.SetXmlCommand'
-	equals "$r" 'Parameter Attribute must contain even number of items.'
-
-	($r = try {Set-Xml '', $v $null} catch {$_})
+	($r = try {Set-Xml '', x $null} catch {$_})
 	equals $r.FullyQualifiedErrorId 'Argument,Xmlips.Commands.SetXmlCommand'
 	equals "$r" 'Parameter Attribute contains null or empty name.'
 }
@@ -39,7 +35,7 @@ task NoXml {
 	equals $r
 }
 
-task Set {
+task SetAttr {
 	Set-Content z.xml '<r><e a="1" /><e a="2" /><e a="2" /></r>'
 
 	## not changed on setting the same
@@ -49,14 +45,16 @@ task Set {
 
 	# single
 	$r = Get-Xml e $xml -Single
-	Set-Xml a, 1 $r -Changed
-	assert (!$doc.IsChanged)
+	$changed = Set-Xml a, 1 $r -Change
+	equals $doc.IsChanged $false
+	equals $changed $null
 
 	# array
 	$r = Get-Xml e[@a=2] $xml
 	equals $r.Count 2
-	Set-Xml a, 2 $r -Changed
-	assert (!$doc.IsChanged)
+	$changed = Set-Xml a, 2 $r -Change
+	equals $doc.IsChanged $false
+	equals $changed $null
 
 	## changed on setting new
 
@@ -72,7 +70,8 @@ task Set {
 
 	# array, changed
 	$r = Get-Xml e[@a=2] $xml
-	$changed = Set-Xml a, -2 $r -Changed
+	$changed = Set-Xml a, -2 $r -Change
+	equals $changed $null
 	equals $r[0].a '-2'
 	equals $r[1].a '-2'
 	equals $r.Count 2
@@ -82,6 +81,24 @@ task Set {
 	$r | Set-Xml a, 2
 	equals $r[0].a '2'
 	equals $r[1].a '2'
+
+	Remove-Item z.xml
+}
+
+task SetText {
+	Set-Content z.xml '<r a="1"/>'
+
+	$xml = Read-Xml z.xml
+	$doc = $xml.OwnerDocument
+
+	Set-Xml '' $xml -Change
+	equals $doc.IsChanged $false
+
+	Set-Xml text1 $xml -Change
+	equals $xml.OuterXml '<r a="1">text1</r>'
+
+	Set-Xml a, 2, b, 2, text2 $xml
+	equals $xml.OuterXml '<r a="2" b="2">text2</r>'
 
 	Remove-Item z.xml
 }

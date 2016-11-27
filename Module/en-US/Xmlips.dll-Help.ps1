@@ -330,40 +330,46 @@ $SiteLink = @{ text = 'Project site:'; URI = 'https://github.com/nightroman/Xmli
 ### Set-Xml command help
 @{
 	command = 'Set-Xml'
-	synopsis = 'Sets XML attributes.'
+	synopsis = 'Sets XML attributes and text.'
 	description = @'
-	The cmdlet sets the specified attribute values.
+	The cmdlet sets the specified attribute and text values.
 '@
 	parameters = @{
 		Attribute = @{
 			required = $true
 			description = @'
-		Specifies the list of attribute names followed by values to be set.
+		Specifies attribute name/value pairs followed by an optional inner
+		text. In other words, if the number of items is odd then the last
+		item is the inner text.
 '@
 		}
 		Xml = @{
 			required = $true
 			description = @'
-		Specifies the XML element which attributes are set.
+		Specifies the XML element which attributes and text are set.
 '@
 		}
-		Changed = @'
-		Tells to set only changed values and return information about changes.
+		Change = @'
+		Tells to set only changed values.
 
-		The same values are not set and the document is not changed. This may
-		avoid unnecessary writing to disk by Save-Xml.
+		The same values are not set and the document is not changed.
+		This may avoid unnecessary writing to disk by Save-Xml.
+'@
+		Changed = @'
+		Tells to set only changed values and return changed information.
 
 		For each changed value an object describing the change is written.
 		The properties are Attribute, OldValue, NewValue, Element.
+		The attribute name is empty for the text value.
 '@
 	}
 	inputs = @{
 		type = 'System.Xml.XmlElement'
-		description = 'XML element which attributes are set.'
+		description = 'XML element which attributes and text are set.'
 	}
 	outputs = @{
 		type = 'None or change information objects'
-		description = 'Change information is retuned if Changed is specified.'
+		description = 'Optional change data information.'
 	}
 	examples = @(
 		@{

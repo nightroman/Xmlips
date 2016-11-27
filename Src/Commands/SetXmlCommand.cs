@@ -28,38 +28,72 @@ namespace Xmlips.Commands
 		bool _XmlSet;
 
 		[Parameter]
+		public SwitchParameter Change { get; set; }
+
+		[Parameter]
 		public SwitchParameter Changed { get; set; }
 
 		protected override void BeginProcessing()
 		{
 			if (Attribute == null) throw new PSArgumentNullException("Attribute");
 			if (Attribute.Length == 0) throw new PSArgumentException("Parameter Attribute must not be empty.", "Attribute");
-			if (Attribute.Length % 2 != 0) throw new PSArgumentException("Parameter Attribute must contain even number of items.", "Attribute");
-			for (int i = Attribute.Length; (i -= 2) >= 0;)
-				if (string.IsNullOrEmpty(Attribute[i])) throw new PSArgumentException("Parameter Attribute contains null or empty name.", "Attribute");
+			for (int i = 1; i < Attribute.Length; i += 2)
+				if (string.IsNullOrEmpty(Attribute[i - 1])) throw new PSArgumentException("Parameter Attribute contains null or empty name.", "Attribute");
+			if (Changed)
+				Change = true;
 		}
 
 		void ProcessItem(XmlElement xml)
 		{
 			if (xml == null) throw new PSArgumentNullException("Xml (item)");
 
-			for (int i = 0; i < Attribute.Length; i += 2)
+			// attribute name/value pairs
+			for (int i = 1; i < Attribute.Length; i += 2)
 			{
-				var attribute = Attribute[i];
-				var newValue = Attribute[i + 1];
-				if (Changed)
+				var attribute = Attribute[i - 1];
+				var newValue = Attribute[i];
+				if (Change)
 				{
 					var oldValue = xml.GetAttribute(attribute);
 					if (oldValue == newValue)
 						continue;
-					WriteObject(new AttributeChange() {
-						Attribute = attribute,
-						OldValue = oldValue,
-						NewValue = newValue,
-						Element = xml
-					});
+
+					if (Changed)
+					{
+						WriteObject(new AttributeChange()
+						{
+							Attribute = attribute,
+							OldValue = oldValue,
+							NewValue = newValue,
+							Element = xml
+						});
+					}
 				}
 				xml.SetAttribute(attribute, newValue);
+			}
+
+			// text as the last odd item
+			if (Attribute.Length % 2 == 1)
+			{
+				var newValue = Attribute[Attribute.Length - 1];
+				if (Change)
+				{
+					var oldValue = xml.InnerText;
+					if (oldValue == newValue)
+						return;
+
+					if (Changed)
+					{
+						WriteObject(new AttributeChange()
+						{
+							Attribute = string.Empty,
+							OldValue = oldValue,
+							NewValue = newValue,
+							Element = xml
+						});
+					}
+				}
+				xml.InnerText = newValue;
 			}
 		}
 

@@ -1,6 +1,13 @@
 
 # Xmlips Release Notes
 
+## v0.3.0
+
+`Set-Xml`
+
+- `Attribute` specifies attribute name/value pairs and the optional text as the last odd item.
+- New switch `Change` tells to set only changed values and do not return data like `Changed` does.
+
 ## v0.2.1
 
 `Add-Xml`: new parameter `Namespace`. Use case: add references or compile items
