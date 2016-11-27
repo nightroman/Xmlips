@@ -57,6 +57,30 @@ $SiteLink = @{ text = 'Project site:'; URI = 'https://github.com/nightroman/Xmli
 	)
 }
 
+### Copy-Xml command help
+@{
+	command = 'Copy-Xml'
+	synopsis = 'Copies the inner XML of one element to another.'
+	description = @'
+	The cmdlet compares inner XML of the source and target. If they are
+	different then the source is copied to the target. Note that this
+	command does not affect attributes.
+'@
+	parameters = @{
+		Source = @{
+			required = $true
+			description = 'Specifies the source element.'
+		}
+		Target = @{
+			required = $true
+			description = 'Specifies the target element.'
+		}
+	}
+	links = @(
+		$SiteLink
+	)
+}
+
 ### Export-Xml command help
 @{
 	command = 'Export-Xml'
@@ -291,6 +315,22 @@ $SiteLink = @{ text = 'Project site:'; URI = 'https://github.com/nightroman/Xmli
 	)
 	links = @(
 		@{ text = 'Export-Xml' }
+		$SiteLink
+	)
+}
+
+### New-Xml command help
+@{
+	command = 'New-Xml'
+	synopsis = 'Creates a new XML element.'
+	description = @'
+	The cmdlet simply creates and returns an XML element.
+'@
+	outputs = @{
+		type = 'System.Xml.XmlElement'
+		description = 'Created XML element.'
+	}
+	links = @(
 		$SiteLink
 	)
 }

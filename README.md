@@ -37,6 +37,14 @@ Sets the specified attribute values.
 
 Removes the specified nodes.
 
+#### New-Xml
+
+Creates an XML element.
+
+#### Copy-Xml
+
+Compares the source and target inner XML and copies if they differ.
+
 ***
 ## Get and Install
 
@@ -58,5 +66,7 @@ Copy the directory *Xmlips* to a PowerShell module directory, see
 
 - [Add-ProjectReference.ps1](https://github.com/nightroman/Xmlips/blob/master/Examples/Add-ProjectReference.ps1)
 adds a reference to a Visual Studio project.
+- [Update-ILSpyList.ps1](https://github.com/nightroman/Xmlips/blob/master/Examples/Update-ILSpyList.ps1)
+updates the specified ILSpy assembly list.
 - [Update-WebXml.ps1](https://github.com/nightroman/Xmlips/blob/master/Examples/Update-WebXml.ps1)
 gets and updates the specified data from web.

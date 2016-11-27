@@ -8,6 +8,13 @@
 - `Attribute` specifies attribute name/value pairs and the optional text as the last odd item.
 - New switch `Change` tells to set only changed values and do not return data like `Changed` does.
 
+New cmdlets
+
+- `New-Xml` - Creates a new XML element.
+- `Copy-Xml` - Copies the inner XML of one element to another.
+
+`Update-ILSpyList.ps1` shows a scenario with two new cmdlets and updated `Set-Xml`.
+
 ## v0.2.1
 
 `Add-Xml`: new parameter `Namespace`. Use case: add references or compile items

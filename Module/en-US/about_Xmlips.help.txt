@@ -33,5 +33,11 @@ LONG DESCRIPTION
     Remove-Xml
         Removes the specified nodes.
 
+    New-Xml
+        Creates an empty XML element.
+
+    Copy-Xml
+        Copies the inner XML of one element to another.
+
 SEE ALSO
     Project site: https://github.com/nightroman/Xmlips

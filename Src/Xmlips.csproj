@@ -62,9 +62,11 @@
     <Compile Include="AttributeChange.cs" />
     <Compile Include="BaseXsltContext.cs" />
     <Compile Include="Commands\AddXmlCommand.cs" />
+    <Compile Include="Commands\CopyXmlCommand.cs" />
     <Compile Include="Commands\ExportXmlCommand.cs" />
     <Compile Include="Commands\FindXmlCommand.cs" />
     <Compile Include="Commands\ImportXmlCommand.cs" />
+    <Compile Include="Commands\NewXmlCommand.cs" />
     <Compile Include="Commands\ReadXmlCommand.cs" />
     <Compile Include="Commands\GetXmlCommand.cs" />
     <Compile Include="Commands\RemoveXmlCommand.cs" />

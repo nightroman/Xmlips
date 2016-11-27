@@ -176,7 +176,7 @@ task PushRelease Version, {
 
 # Synopsis: Make and push the NuGet package.
 task PushNuGet NuGet, {
-	exec { NuGet push "$ModuleName.$Version.nupkg" }
+	exec { NuGet push "$ModuleName.$Version.nupkg" -Source nuget.org }
 },
 Clean
 
