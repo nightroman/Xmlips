@@ -1,6 +1,10 @@
 
 # Xmlips Release Notes
 
+## v0.4.0
+
+`New-Xml`: new parameters `Tag` and `Attribute`.
+
 ## v0.3.0
 
 `Set-Xml`

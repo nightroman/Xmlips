@@ -8,6 +8,11 @@
 Import-Module Xmlips
 
 $SiteLink = @{ text = 'Project site:'; URI = 'https://github.com/nightroman/Xmlips' }
+$AttributeDescription = @'
+		Specifies attribute name/value pairs followed by an optional inner
+		text. In other words, if the number of items is odd then the last
+		item is the inner text.
+'@
 
 ### Add-Xml command help
 @{
@@ -324,8 +329,15 @@ $SiteLink = @{ text = 'Project site:'; URI = 'https://github.com/nightroman/Xmli
 	command = 'New-Xml'
 	synopsis = 'Creates a new XML element.'
 	description = @'
-	The cmdlet simply creates and returns an XML element.
+	The cmdlet creates and returns an XML element.
 '@
+	parameters = @{
+		Tag = @'
+		Specifies the new element name.
+		The default name is "root".
+'@
+		Attribute = $AttributeDescription
+	}
 	outputs = @{
 		type = 'System.Xml.XmlElement'
 		description = 'Created XML element.'
@@ -377,11 +389,7 @@ $SiteLink = @{ text = 'Project site:'; URI = 'https://github.com/nightroman/Xmli
 	parameters = @{
 		Attribute = @{
 			required = $true
-			description = @'
-		Specifies attribute name/value pairs followed by an optional inner
-		text. In other words, if the number of items is odd then the last
-		item is the inner text.
-'@
+			description = $AttributeDescription
 		}
 		Xml = @{
 			required = $true
