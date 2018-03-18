@@ -52,7 +52,7 @@ Xmlips is distributed as the NuGet package [Xmlips](https://www.nuget.org/packag
 Download it to the current location as the directory *"Xmlips"* by this PowerShell command:
 
 ```powershell
-    Invoke-Expression "& {$((New-Object Net.WebClient).DownloadString('https://raw.githubusercontent.com/nightroman/PowerShelf/master/Save-NuGetTool.ps1'))} Xmlips"
+Invoke-Expression "& {$((New-Object Net.WebClient).DownloadString('https://raw.githubusercontent.com/nightroman/PowerShelf/master/Save-NuGetTool.ps1'))} Xmlips"
 ```
 
 Alternatively, download it by NuGet tools or [directly](http://nuget.org/api/v2/package/Xmlips).
