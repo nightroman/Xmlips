@@ -96,8 +96,9 @@ task Help {
 # Synopsis: Convert markdown files to HTML.
 # <http://johnmacfarlane.net/pandoc/>
 task Markdown {
-	exec { pandoc.exe --standalone --from=markdown_strict --output=README.htm README.md }
-	exec { pandoc.exe --standalone --from=markdown_strict --output=Release-Notes.htm Release-Notes.md }
+	function Convert-Markdown($Name) {pandoc.exe --standalone --from=gfm "--output=$Name.htm" "--metadata=pagetitle=$Name" "$Name.md"}
+	exec { Convert-Markdown README }
+	exec { Convert-Markdown Release-Notes }
 }
 
 # Synopsis: Set $script:Version.

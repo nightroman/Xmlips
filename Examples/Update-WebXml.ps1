@@ -56,10 +56,9 @@ param(
 	[Parameter()]
 	[string]$Path = 'web.xml'
 )
-
-#requires -version 3
-$ErrorActionPreference = 'Stop'
 Set-StrictMode -Off
+$ErrorActionPreference = 'Stop'
+[System.Net.ServicePointManager]::SecurityProtocol = "$([System.Net.ServicePointManager]::SecurityProtocol),Tls11,Tls12"
 
 Import-Module Xmlips
 $xml = Read-Xml $Path -Backup
