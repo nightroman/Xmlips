@@ -33,7 +33,7 @@ task Attribute {
 }
 
 task Log {
-	Remove-Item [z] -Force -Recurse
+	remove z
 
 	# case 1
 	$e = New-Xml log
