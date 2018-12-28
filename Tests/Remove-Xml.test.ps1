@@ -79,3 +79,16 @@ task RemoveChildNodesAndAttributes {
 	$xml.RemoveAll()
 	equals $xml.OuterXml '<r></r>'
 }
+
+# Issue found on removing @Bounds from DGML.
+task RemoveAttributes {
+	$xml = [xml]@'
+<r a1="1">
+	<e1 a1="1"/>
+	<e2 a2="2"/>
+</r>
+'@
+
+	$xml | Get-Xml //@a1 | Remove-Xml
+	equals '<r><e1 /><e2 a2="2" /></r>' $xml.OuterXml
+}

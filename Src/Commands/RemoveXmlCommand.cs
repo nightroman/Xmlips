@@ -31,7 +31,15 @@ namespace Xmlips.Commands
 			foreach(var node in Xml)
 			{
 				if (node == null) throw new PSArgumentNullException("Xml (item)");
-				node.ParentNode.RemoveChild(node);
+				var attr = node as XmlAttribute;
+				if (attr == null)
+				{
+					node.ParentNode.RemoveChild(node);
+				}
+				else
+				{
+					attr.OwnerElement.Attributes.Remove(attr);
+				}
 			}
 		}
 	}
