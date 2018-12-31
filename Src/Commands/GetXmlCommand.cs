@@ -13,7 +13,7 @@ using System.Xml.XPath;
 namespace Xmlips.Commands
 {
 	[Cmdlet(VerbsCommon.Get, "Xml")]
-	[OutputType(typeof(XmlNode))]
+	[OutputType(typeof(XmlElement))]
 	public sealed class GetXmlCommand : PSCmdlet
 	{
 		[Parameter(Position = 0)]

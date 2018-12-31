@@ -1,5 +1,6 @@
 
 Import-Module Xmlips
+$PSVersion = $PSVersionTable.PSVersion.Major
 
 task NullXPath {
 	($r = try {Get-Xml $null $null} catch {$_})
@@ -208,4 +209,11 @@ task _160102_013934 {
 	$r = try {Get-Xml '@my:a' $e} catch {$_}
 	equals $r.Exception.InnerException.GetType().Name NullReferenceException
 	equals "$r" $err
+}
+
+# The actual and documented type is XmlNode. But the specified type must be
+# XmlElement, for better code completion.
+task OutputType -If ($PSVersion -ge 5) {
+	$command = Get-Command Get-Xml -CommandType Cmdlet
+	equals System.Xml.XmlElement $command.OutputType.Name
 }

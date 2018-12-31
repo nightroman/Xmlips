@@ -8,7 +8,6 @@ using System.Xml;
 namespace Xmlips.Commands
 {
 	[Cmdlet(VerbsData.Save, "Xml")]
-	[OutputType(typeof(XmlElement))]
 	public sealed class SaveXmlCommand : PSCmdlet
 	{
 		[Parameter(Position = 0)]

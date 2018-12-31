@@ -1,6 +1,12 @@
 
 # Xmlips Release Notes
 
+## v0.4.1
+
+- Tweak `Get-Xml` output type attribute for better code completion.
+- Fix `Remove-Xml` for attributes as input.
+- Add *Examples/Clear-Dgml.ps1*.
+
 ## v0.4.0
 
 `New-Xml`: new parameters `Tag` and `Attribute`.
