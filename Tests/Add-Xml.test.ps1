@@ -1,14 +1,25 @@
 
+$Version = $PSVersionTable.PSVersion.Major
 Import-Module Xmlips
 
 task BadTag {
 	($r = try {Add-Xml} catch {$_})
 	equals $r.FullyQualifiedErrorId 'ArgumentNull,Xmlips.Commands.AddXmlCommand'
-	assert ($r -clike '*: Tag')
+	if ($Version -ge 7) {
+		equals "$r" "Value cannot be null. (Parameter 'Tag')"
+	}
+	else {
+		assert ($r -clike '*: Tag')
+	}
 
 	($r = try {Add-Xml ''} catch {$_})
 	equals $r.FullyQualifiedErrorId 'ArgumentNull,Xmlips.Commands.AddXmlCommand'
-	assert ($r -clike '*: Tag')
+	if ($Version -ge 7) {
+		equals "$r" "Value cannot be null. (Parameter 'Tag')"
+	}
+	else {
+		assert ($r -clike '*: Tag')
+	}
 }
 
 task BadXml {
@@ -18,7 +29,12 @@ task BadXml {
 
 	($r = try {Add-Xml e @($null)} catch {$_})
 	equals $r.FullyQualifiedErrorId 'ArgumentNull,Xmlips.Commands.AddXmlCommand'
-	assert ($r -clike '*: Xml (item)')
+	if ($Version -ge 7) {
+		equals "$r" "Value cannot be null. (Parameter 'Xml (item)')"
+	}
+	else {
+		assert ($r -clike '*: Xml (item)')
+	}
 }
 
 task NoXml {

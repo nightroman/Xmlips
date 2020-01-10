@@ -1,10 +1,16 @@
 
+$Version = $PSVersionTable.PSVersion.Major
 Import-Module Xmlips
 
 task BadAttribute {
 	($r = try {Set-Xml $null $null} catch {$_})
 	equals $r.FullyQualifiedErrorId 'ArgumentNull,Xmlips.Commands.SetXmlCommand'
-	assert ($r -clike '*: Attribute')
+	if ($Version -ge 7) {
+		equals "$r" "Value cannot be null. (Parameter 'Attribute')"
+	}
+	else {
+		assert ($r -clike '*: Attribute')
+	}
 
 	($r = try {Set-Xml @() $null} catch {$_})
 	equals $r.FullyQualifiedErrorId 'Argument,Xmlips.Commands.SetXmlCommand'
@@ -22,7 +28,12 @@ task BadXml {
 
 	($r = try {Set-Xml x, x @($null)} catch {$_})
 	equals $r.FullyQualifiedErrorId 'ArgumentNull,Xmlips.Commands.SetXmlCommand'
-	assert ($r -clike '*: Xml (item)')
+	if ($Version -ge 7) {
+		equals "$r" "Value cannot be null. (Parameter 'Xml (item)')"
+	}
+	else {
+		assert ($r -clike '*: Xml (item)')
+	}
 }
 
 task NoXml {

@@ -1,4 +1,5 @@
 ﻿
+$Version = $PSVersionTable.PSVersion.Major
 Import-Module Xmlips
 
 task BadXml {
@@ -8,7 +9,12 @@ task BadXml {
 
 	($r = try {Export-Xml z.xml @($null)} catch {$_})
 	equals $r.FullyQualifiedErrorId 'ArgumentNull,Xmlips.Commands.ExportXmlCommand'
-	assert ($r -clike '*: Xml (item)')
+	if ($Version -ge 7) {
+		equals "$r" "Value cannot be null. (Parameter 'Xml (item)')"
+	}
+	else {
+		assert ($r -clike '*: Xml (item)')
+	}
 
 	Remove-Item z.xml
 }

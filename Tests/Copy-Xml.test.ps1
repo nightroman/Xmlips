@@ -1,16 +1,27 @@
 
+$Version = $PSVersionTable.PSVersion.Major
 Import-Module Xmlips
 
 task BadSource {
 	($r = try {Copy-Xml} catch {$_})
 	equals $r.FullyQualifiedErrorId 'ArgumentNull,Xmlips.Commands.CopyXmlCommand'
-	assert ($r -clike '*: Source')
+	if ($Version -ge 7) {
+		equals "$r" "Value cannot be null. (Parameter 'Source')"
+	}
+	else {
+		assert ($r -clike '*: Source')
+	}
 }
 
 task BadTarget {
 	($r = try {Copy-Xml (New-Xml)} catch {$_})
 	equals $r.FullyQualifiedErrorId 'ArgumentNull,Xmlips.Commands.CopyXmlCommand'
-	assert ($r -clike '*: Target')
+	if ($Version -ge 7) {
+		equals "$r" "Value cannot be null. (Parameter 'Target')"
+	}
+	else {
+		assert ($r -clike '*: Target')
+	}
 }
 
 task Copy {

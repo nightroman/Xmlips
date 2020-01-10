@@ -1,5 +1,6 @@
 ﻿
 Import-Module Xmlips
+$Version = $PSVersionTable.PSVersion.Major
 
 task BadContent {
 	($r = try {Read-Xml missing.xml -Content $null} catch {$_})
@@ -18,11 +19,11 @@ task RootIsMissing {
 	($r = try {Read-Xml z.xml} catch {$_})
 	equals "$r" 'Root element is missing.'
 	equals $r.FullyQualifiedErrorId 'System.Xml.XmlException,Xmlips.Commands.ReadXmlCommand'
-	Remove-Item z.xml
+	remove z.xml
 }
 
 task New {
-	if (Test-Path z.xml) {Remove-Item z.xml}
+	remove z.xml
 	$content = '<root/>'
 
 	$xml = Read-Xml z.xml -Content $content
@@ -37,24 +38,30 @@ task New {
 	assert (!$xml.OwnerDocument.IsChanged)
 	$e = Get-Xml e $xml
 	equals $e.a 'атрибут'
+
+	remove z.xml
 }
 
 task NewBom {
-	if (Test-Path z.xml) {Remove-Item z.xml}
+	remove z.xml
 
 	$content = '<?xml version="1.0" encoding="utf-8"?><root/>'
 	$xml = Read-Xml z.xml -Content $content
 	Save-Xml $xml
 	equals (Get-Item z.xml).Length ($content.Length + 6L)
+
+	remove z.xml
 }
 
 task NewNoBom {
-	if (Test-Path z.xml) {Remove-Item z.xml}
+	remove z.xml
 
 	$content = '<root/>'
 	$xml = Read-Xml z.xml -Content $content
 	Save-Xml $xml
 	equals (Get-Item z.xml).Length ($content.Length + 1L)
+
+	remove z.xml
 }
 
 task Add {
@@ -116,6 +123,8 @@ task Remove Edit, {
 </root>
 
 '@)
+
+	remove z.xml
 }
 
 task Backup {
@@ -129,8 +138,35 @@ task Backup {
 
 	$xml = Read-Xml z.xml.bak
 	equals $xml.OuterXml '<r />'
+
+	remove z.xml, z.xml.bak
 }
 
-task Clean {
-	Remove-Item z.xml, z.xml.bak
+task Settings {
+	# this XML (pandoc) cannot be read with default settings
+	Set-Content z.xml @'
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title></title>
+</head>
+<body>
+<p>Hello</p>
+</body>
+</html>
+'@
+
+	$settings = New-Object System.Xml.XmlReaderSettings
+	if ($Version -eq 2) {
+		$settings.ProhibitDtd = $false
+		$settings.XmlResolver = $null
+	}
+	else {
+		$settings.DtdProcessing = 'Ignore'
+	}
+
+	$r = Read-Xml z.xml -Settings $settings | Get-Xml //x:p -Namespace @{x="http://www.w3.org/1999/xhtml"}
+	equals $r.'#text' Hello
+
+	remove z.xml
 }

@@ -14,12 +14,20 @@ namespace Xmlips
 		public string FileName { get; private set; }
 		bool _backup;
 
-		public FileXmlDocument(string fileName, string content, bool backup)
+		public FileXmlDocument(string fileName, string content, bool backup, XmlReaderSettings settings)
 		{
 			FileName = Path.GetFullPath(fileName);
 			try
 			{
-				Load(FileName);
+				if (settings == null)
+				{
+					Load(FileName);
+				}
+				else
+				{
+					using (var reader = XmlReader.Create(FileName, settings))
+						Load(reader);
+				}
 				_backup = backup;
 				AddChangeHandlers();
 			}

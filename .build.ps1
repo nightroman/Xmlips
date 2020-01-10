@@ -1,16 +1,6 @@
-
 <#
 .Synopsis
 	Build script (https://github.com/nightroman/Invoke-Build)
-
-.Description
-	HOW TO USE THIS SCRIPT AND BUILD THE MODULE
-
-	Get the utility script Invoke-Build.ps1:
-	https://github.com/nightroman/Invoke-Build
-
-	Copy it to the path. Set location to here. Build:
-	PS> Invoke-Build Build
 #>
 
 param(
@@ -28,14 +18,17 @@ function Get-Version {
 	switch -Regex -File Release-Notes.md {'##\s+v(\d+\.\d+\.\d+)' {return $Matches[1]} }
 }
 
-# Synopsis: Generate or update meta files.
-task Meta -Inputs Release-Notes.md -Outputs Module\$ModuleName.psd1, Src\AssemblyInfo.cs {
-	$Version = Get-Version
-	$Project = 'https://github.com/nightroman/Xmlips'
-	$Summary = 'Xmlips - XML in PowerShell'
-	$Copyright = 'Copyright (c) Roman Kuzmin'
+# Synopsis: Generate meta files.
+task Meta @{
+	Inputs = $BuildFile, 'Release-Notes.md'
+	Outputs = "Module\$ModuleName.psd1", 'Src\AssemblyInfo.cs'
+	Jobs = {
+		$Version = Get-Version
+		$Project = 'https://github.com/nightroman/Xmlips'
+		$Summary = 'Xmlips - XML in PowerShell'
+		$Copyright = 'Copyright (c) Roman Kuzmin'
 
-	Set-Content Module\$ModuleName.psd1 @"
+		Set-Content Module\$ModuleName.psd1 @"
 @{
 	Author = 'Roman Kuzmin'
 	ModuleVersion = '$Version'
@@ -50,7 +43,7 @@ task Meta -Inputs Release-Notes.md -Outputs Module\$ModuleName.psd1, Src\Assembl
 }
 "@
 
-	Set-Content Src\AssemblyInfo.cs @"
+		Set-Content Src\AssemblyInfo.cs @"
 using System;
 using System.Reflection;
 using System.Runtime.InteropServices;
@@ -64,24 +57,26 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 [assembly: CLSCompliant(false)]
 "@
+	}
 }
 
-# Synopsis: Build and trigger PostBuild.
+# Synopsis: Build and publish.
 task Build Meta, {
-	use * MSBuild.exe
-	exec { MSBuild.exe Src\$ModuleName.csproj /t:Build /p:Configuration=$Configuration /p:TargetFrameworkVersion=$TargetFrameworkVersion }
-}
+	$MSBuild = Resolve-MSBuild
+	exec { & $MSBuild Src\$ModuleName.csproj /t:Build /p:Configuration=$Configuration /p:TargetFrameworkVersion=$TargetFrameworkVersion }
+},
+Help
 
 # Synopsis: Copy files to the module root.
 # It is called from the post build event.
-task PostBuild {
+task Publish {
 	exec { robocopy Module $ModuleRoot /s /np /r:0 /xf *-Help.ps1 } (0..3)
 	Copy-Item Src\Bin\$Configuration\$ModuleName.dll $ModuleRoot
 }
 
 # Synopsis: Remove temp files.
 task Clean {
-	remove Module\$ModuleName.psd1, "$ModuleName.*.nupkg", z, Src\bin, Src\obj, README.htm, Release-Notes.htm
+	remove z, Src\bin, Src\obj, README.htm, *.nupkg
 }
 
 # Synopsis: Build and test help by https://github.com/nightroman/Helps
@@ -91,12 +86,9 @@ task Help {
 	Convert-Helps Module\en-US\$ModuleName.dll-Help.ps1 $ModuleRoot\en-US\$ModuleName.dll-Help.xml
 }
 
-# Synopsis: Convert markdown files to HTML.
-# <http://johnmacfarlane.net/pandoc/>
+# Synopsis: Convert markdown to HTML.
 task Markdown {
-	function Convert-Markdown($Name) {pandoc.exe --standalone --from=gfm "--output=$Name.htm" "--metadata=pagetitle=$Name" "$Name.md"}
-	exec { Convert-Markdown README }
-	exec { Convert-Markdown Release-Notes }
+	exec { pandoc.exe README.md --output=README.htm --from=gfm --standalone --metadata=pagetitle:README }
 }
 
 # Synopsis: Set $script:Version.
@@ -113,34 +105,23 @@ task Package Markdown, {
 	remove z
 	$null = mkdir z\tools\$ModuleName\en-US
 
-	Copy-Item -Destination z\tools\$ModuleName `
-	LICENSE.txt,
-	README.htm,
-	Release-Notes.htm,
-	$ModuleRoot\$ModuleName.dll,
-	$ModuleRoot\$ModuleName.psd1
+	Copy-Item -Destination z\tools\$ModuleName $(
+		'LICENSE.txt'
+		'README.htm'
+		"$ModuleRoot\$ModuleName.dll"
+		"$ModuleRoot\$ModuleName.psd1"
+	)
 
-	Copy-Item -Destination z\tools\$ModuleName\en-US `
-	$ModuleRoot\en-US\about_$ModuleName.help.txt,
-	$ModuleRoot\en-US\$ModuleName.dll-Help.xml
+	Copy-Item -Destination z\tools\$ModuleName\en-US $(
+		"$ModuleRoot\en-US\about_$ModuleName.help.txt"
+		"$ModuleRoot\en-US\$ModuleName.dll-Help.xml"
+	)
 }
 
 # Synopsis: Make NuGet package.
 task NuGet Package, Version, {
-	$summary = @'
-The module provides cmdlets for basic operations on XML in PowerShell v2.0 or newer.
-'@
-	$description = @"
-$summary
+	$summary = 'Legacy package of the PSGallery module Xmlips.'
 
----
-
-To install Xmlips, follow the Get and Install steps:
-https://github.com/nightroman/Xmlips#get-and-install
-
----
-"@
-	# nuspec
 	Set-Content z\Package.nuspec @"
 <?xml version="1.0"?>
 <package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
@@ -149,19 +130,32 @@ https://github.com/nightroman/Xmlips#get-and-install
 		<version>$Version</version>
 		<owners>Roman Kuzmin</owners>
 		<authors>Roman Kuzmin</authors>
+		<license type="expression">Apache-2.0</license>
 		<requireLicenseAcceptance>false</requireLicenseAcceptance>
-		<licenseUrl>http://www.apache.org/licenses/LICENSE-2.0</licenseUrl>
 		<projectUrl>https://github.com/nightroman/Xmlips</projectUrl>
 		<summary>$summary</summary>
-		<description>$description</description>
+		<description>$summary</description>
 		<tags>PowerShell Module XML XPath</tags>
 		<releaseNotes>https://github.com/nightroman/Xmlips/blob/master/Release-Notes.md</releaseNotes>
 	</metadata>
 </package>
 "@
-	# pack
-	exec { NuGet pack z\Package.nuspec -NoPackageAnalysis }
+
+	exec { NuGet pack z\Package.nuspec }
 }
+
+# Synopsis: Make and push the NuGet package.
+task PushNuGet NuGet, {
+	exec { NuGet push "$ModuleName.$Version.nupkg" -Source nuget.org }
+},
+Clean
+
+# Synopsis: Make and push the PSGallery package.
+task PushPSGallery Package, Version, {
+	$NuGetApiKey = Read-Host NuGetApiKey
+	Publish-Module -Path z\tools\$ModuleName -NuGetApiKey $NuGetApiKey
+},
+Clean
 
 # Synopsis: Push to the repository with a version tag.
 task PushRelease Version, {
@@ -173,21 +167,23 @@ task PushRelease Version, {
 	exec { git push origin "v$Version" }
 }
 
-# Synopsis: Make and push the NuGet package.
-task PushNuGet NuGet, {
-	exec { NuGet push "$ModuleName.$Version.nupkg" -Source nuget.org }
-},
-Clean
-
-# Synopsis: Test PowerShell v2.
-task Test2 {
-	exec {PowerShell.exe -Version 2 Invoke-Build ** Tests}
-}
-
 # Synopsis: Test current PowerShell.
-task Test {
+task Test3 {
 	Invoke-Build ** Tests
 }
 
-# Synopsis: Build, test and clean all.
-task . Build, Test, Test2, Help, Clean
+# Synopsis: Test PowerShell v2.
+task Test2 {
+	exec { powershell.exe -Version 2 Invoke-Build Test3 }
+}
+
+# Synopsis: Test PowerShell Core.
+task Test6 -If $env:powershell6 {
+	exec { & $env:powershell6 -Command Invoke-Build Test3 }
+}
+
+# Synopsis: Test PowerShell versions.
+task Test Test3, Test6, Test2
+
+# Synopsis: Build, test, clean.
+task . Build, Test, Clean

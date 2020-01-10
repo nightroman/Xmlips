@@ -1,34 +1,65 @@
 
+$Version = $PSVersionTable.PSVersion.Major
 Import-Module Xmlips
 
 task BadTag {
 	($r = try {Find-Xml} catch {$_})
 	equals $r.FullyQualifiedErrorId 'ArgumentNull,Xmlips.Commands.FindXmlCommand'
-	assert ($r -clike '*: Tag')
+	if ($Version -ge 7) {
+		equals "$r" "Value cannot be null. (Parameter 'Tag')"
+	}
+	else {
+		assert ($r -clike '*: Tag')
+	}
 
 	($r = try {Find-Xml ''} catch {$_})
 	equals $r.FullyQualifiedErrorId 'ArgumentNull,Xmlips.Commands.FindXmlCommand'
-	assert ($r -clike '*: Tag')
+	if ($Version -ge 7) {
+		equals "$r" "Value cannot be null. (Parameter 'Tag')"
+	}
+	else {
+		assert ($r -clike '*: Tag')
+	}
 }
 
 task BadKey {
 	($r = try {Find-Xml e} catch {$_})
 	equals $r.FullyQualifiedErrorId 'ArgumentNull,Xmlips.Commands.FindXmlCommand'
-	assert ($r -clike '*: Key')
+	if ($Version -ge 7) {
+		equals "$r" "Value cannot be null. (Parameter 'Key')"
+	}
+	else {
+		assert ($r -clike '*: Key')
+	}
 
 	($r = try {Find-Xml e ''} catch {$_})
 	equals $r.FullyQualifiedErrorId 'ArgumentNull,Xmlips.Commands.FindXmlCommand'
-	assert ($r -clike '*: Key')
+	if ($Version -ge 7) {
+		equals "$r" "Value cannot be null. (Parameter 'Key')"
+	}
+	else {
+		assert ($r -clike '*: Key')
+	}
 }
 
 task BadValue {
 	($r = try {Find-Xml e k} catch {$_})
 	equals $r.FullyQualifiedErrorId 'ArgumentNull,Xmlips.Commands.FindXmlCommand'
-	assert ($r -clike '*: Value')
+	if ($Version -ge 7) {
+		equals "$r" "Value cannot be null. (Parameter 'Value')"
+	}
+	else {
+		assert ($r -clike '*: Value')
+	}
 
 	($r = try {Find-Xml e k ''} catch {$_})
 	equals $r.FullyQualifiedErrorId 'ArgumentNull,Xmlips.Commands.FindXmlCommand'
-	assert ($r -clike '*: Value')
+	if ($Version -ge 7) {
+		equals "$r" "Value cannot be null. (Parameter 'Value')"
+	}
+	else {
+		assert ($r -clike '*: Value')
+	}
 }
 
 task BadXml {
@@ -38,7 +69,12 @@ task BadXml {
 
 	($r = try {Find-Xml e k v @($null)} catch {$_})
 	equals $r.FullyQualifiedErrorId 'ArgumentNull,Xmlips.Commands.FindXmlCommand'
-	assert ($r -clike '*: Xml (item)')
+	if ($Version -ge 7) {
+		equals "$r" "Value cannot be null. (Parameter 'Xml (item)')"
+	}
+	else {
+		assert ($r -clike '*: Xml (item)')
+	}
 }
 
 task NoXml {

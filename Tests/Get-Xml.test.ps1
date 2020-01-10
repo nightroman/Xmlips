@@ -1,23 +1,38 @@
 
+$Version = $PSVersionTable.PSVersion.Major
 Import-Module Xmlips
-$PSVersion = $PSVersionTable.PSVersion.Major
 
 task NullXPath {
 	($r = try {Get-Xml $null $null} catch {$_})
 	equals $r.FullyQualifiedErrorId 'ArgumentNull,Xmlips.Commands.GetXmlCommand'
-	assert ($r -clike '*: XPath')
+	if ($Version -ge 7) {
+		equals "$r" "Value cannot be null. (Parameter 'XPath')"
+	}
+	else {
+		assert ($r -clike '*: XPath')
+	}
 }
 
 task EmptyXPath {
 	($r = try {Get-Xml '' $null} catch {$_})
 	equals $r.FullyQualifiedErrorId 'ArgumentNull,Xmlips.Commands.GetXmlCommand'
-	assert ($r -clike '*: XPath')
+	if ($Version -ge 7) {
+		equals "$r" "Value cannot be null. (Parameter 'XPath')"
+	}
+	else {
+		assert ($r -clike '*: XPath')
+	}
 }
 
 task BadXml {
 	($r = try {Get-Xml * @($null)} catch {$_})
 	equals $r.FullyQualifiedErrorId 'ArgumentNull,Xmlips.Commands.GetXmlCommand'
-	assert ($r -clike '*: Xml (item)')
+	if ($Version -ge 7) {
+		equals "$r" "Value cannot be null. (Parameter 'Xml (item)')"
+	}
+	else {
+		assert ($r -clike '*: Xml (item)')
+	}
 
 	($r = try {Get-Xml *} catch {$_})
 	equals $r.FullyQualifiedErrorId 'Argument,Xmlips.Commands.GetXmlCommand'

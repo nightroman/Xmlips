@@ -1,4 +1,3 @@
-
 <#
 .Synopsis
 	Help script (https://github.com/nightroman/Helps)
@@ -467,6 +466,9 @@ $AttributeDescription = @'
 		Tells to create a new document from the specified content if the source
 		file does not exist. In this case the properties IsNew and IsChanged
 		are set to true.
+'@
+		Settings = @'
+		Specifies the custom XML reader settings instead of the default.
 '@
 		Backup = @'
 		Tells to create a backup copy of the original source file on saving of

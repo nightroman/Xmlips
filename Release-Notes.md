@@ -1,5 +1,10 @@
-
 # Xmlips Release Notes
+
+## v1.0.0
+
+`Read-Xml`
+
+- New parameter `Settings` (`[XmlReaderSettings]`).
 
 ## v0.4.1
 

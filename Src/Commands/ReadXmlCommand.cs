@@ -18,13 +18,16 @@ namespace Xmlips.Commands
 		public string Content { get; set; }
 
 		[Parameter]
+		public XmlReaderSettings Settings { get; set; }
+
+		[Parameter]
 		public SwitchParameter Backup { get; set; }
 
 		protected override void BeginProcessing()
 		{
 			Path = GetUnresolvedProviderPathFromPSPath(Path);
 
-			var xml = new FileXmlDocument(Path, Content, Backup);
+			var xml = new FileXmlDocument(Path, Content, Backup, Settings);
 
 			WriteObject(xml.DocumentElement);
 		}
