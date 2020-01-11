@@ -1,5 +1,9 @@
 # Xmlips Release Notes
 
+## v1.0.1
+
+Add details to the PSGallery package.
+
 ## v1.0.0
 
 `Read-Xml`

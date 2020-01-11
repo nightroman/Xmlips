@@ -40,6 +40,15 @@ task Meta @{
 
 	PowerShellVersion = '2.0'
 	GUID = 'bc86e123-c8c7-4d69-bbef-fc4d068b6c05'
+
+	PrivateData = @{
+		PSData = @{
+			Tags = 'XML', 'XPath'
+			ProjectUri = 'https://github.com/nightroman/Xmlips'
+			LicenseUri = 'http://www.apache.org/licenses/LICENSE-2.0'
+			ReleaseNotes = 'https://github.com/nightroman/Xmlips/blob/master/Release-Notes.md'
+		}
+	}
 }
 "@
 
