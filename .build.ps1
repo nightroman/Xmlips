@@ -1,6 +1,6 @@
 <#
 .Synopsis
-	Build script (https://github.com/nightroman/Invoke-Build)
+	Build script, https://github.com/nightroman/Invoke-Build
 #>
 
 param(
@@ -9,9 +9,7 @@ param(
 )
 
 $ModuleName = 'Xmlips'
-
-# Module directory.
-$ModuleRoot = Join-Path ([Environment]::GetFolderPath('MyDocuments')) WindowsPowerShell\Modules\$ModuleName
+$ModuleRoot = "$env:ProgramFiles\WindowsPowerShell\Modules\$ModuleName"
 
 # Get version from release notes.
 function Get-Version {
