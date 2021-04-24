@@ -5,7 +5,7 @@
 
 param(
 	$Configuration = 'Release',
-	$TargetFrameworkVersion = 'v2.0'
+	$TargetFrameworkVersion = 'v4.0'
 )
 
 $ModuleName = 'Xmlips'
@@ -19,7 +19,7 @@ function Get-Version {
 }
 
 # Synopsis: Generate meta files.
-task Meta @{
+task meta @{
 	Inputs = $BuildFile, 'Release-Notes.md'
 	Outputs = "Module\$ModuleName.psd1", 'Src\AssemblyInfo.cs'
 	Jobs = {
@@ -70,7 +70,7 @@ using System.Runtime.InteropServices;
 }
 
 # Synopsis: Build and publish.
-task Build Meta, {
+task build meta, {
 	$MSBuild = Resolve-MSBuild
 	exec { & $MSBuild Src\$ModuleName.csproj /t:Build /p:Configuration=$Configuration /p:TargetFrameworkVersion=$TargetFrameworkVersion }
 },
@@ -78,30 +78,30 @@ Help
 
 # Synopsis: Copy files to the module root.
 # It is called from the post build event.
-task Publish {
+task publish {
 	exec { robocopy Module $ModuleRoot /s /np /r:0 /xf *-Help.ps1 } (0..3)
 	Copy-Item Src\Bin\$Configuration\$ModuleName.dll $ModuleRoot
 }
 
 # Synopsis: Remove temp files.
-task Clean {
+task clean {
 	remove z, Src\bin, Src\obj, README.htm, *.nupkg
 }
 
 # Synopsis: Build and test help by https://github.com/nightroman/Helps
-task Help {
+task help {
 	. Helps.ps1
 	Test-Helps Module\en-US\$ModuleName.dll-Help.ps1
 	Convert-Helps Module\en-US\$ModuleName.dll-Help.ps1 $ModuleRoot\en-US\$ModuleName.dll-Help.xml
 }
 
 # Synopsis: Convert markdown to HTML.
-task Markdown {
+task markdown {
 	exec { pandoc.exe README.md --output=README.htm --from=gfm --standalone --metadata=pagetitle:README }
 }
 
 # Synopsis: Set $script:Version.
-task Version {
+task version {
 	($script:Version = Get-Version)
 	# module version
 	assert ((Get-Module $ModuleName -ListAvailable).Version -eq ([Version]$script:Version))
@@ -110,7 +110,7 @@ task Version {
 }
 
 # Synopsis: Make the package in z\tools.
-task Package Markdown, {
+task package markdown, {
 	remove z
 	$null = mkdir z\tools\$ModuleName\en-US
 
@@ -128,7 +128,7 @@ task Package Markdown, {
 }
 
 # Synopsis: Make NuGet package.
-task NuGet Package, Version, {
+task nuget package, version, {
 	$summary = 'Legacy package of the PSGallery module Xmlips.'
 
 	Set-Content z\Package.nuspec @"
@@ -154,20 +154,20 @@ task NuGet Package, Version, {
 }
 
 # Synopsis: Make and push the NuGet package.
-task PushNuGet NuGet, {
+task pushNuGet nuget, {
 	exec { NuGet push "$ModuleName.$Version.nupkg" -Source nuget.org }
 },
-Clean
+clean
 
 # Synopsis: Make and push the PSGallery package.
-task PushPSGallery Package, Version, {
+task pushPSGallery package, version, {
 	$NuGetApiKey = Read-Host NuGetApiKey
 	Publish-Module -Path z\tools\$ModuleName -NuGetApiKey $NuGetApiKey
 },
-Clean
+clean
 
 # Synopsis: Push to the repository with a version tag.
-task PushRelease Version, {
+task pushRelease version, {
 	$changes = exec { git status --short }
 	assert (!$changes) "Please, commit changes."
 
@@ -177,22 +177,17 @@ task PushRelease Version, {
 }
 
 # Synopsis: Test current PowerShell.
-task Test3 {
+task test3 {
 	Invoke-Build ** Tests
 }
 
-# Synopsis: Test PowerShell v2.
-task Test2 {
-	exec { powershell.exe -Version 2 Invoke-Build Test3 }
-}
-
 # Synopsis: Test PowerShell Core.
-task Test6 -If $env:powershell6 {
-	exec { & $env:powershell6 -Command Invoke-Build Test3 }
+task test6 -If $env:powershell6 {
+	exec { & $env:powershell6 -Command Invoke-Build test3 }
 }
 
-# Synopsis: Test PowerShell versions.
-task Test Test3, Test6, Test2
+# Synopsis: Test versions.
+task test test3, test6
 
 # Synopsis: Build, test, clean.
-task . Build, Test, Clean
+task . build, test, clean
