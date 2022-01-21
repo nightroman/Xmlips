@@ -113,7 +113,7 @@ task package markdown, {
 	$null = mkdir z\tools\$ModuleName\en-US
 
 	Copy-Item -Destination z\tools\$ModuleName $(
-		'LICENSE.txt'
+		'LICENSE'
 		'README.htm'
 		"$ModuleRoot\$ModuleName.dll"
 		"$ModuleRoot\$ModuleName.psd1"
@@ -153,7 +153,8 @@ task nuget package, version, {
 
 # Synopsis: Make and push the NuGet package.
 task pushNuGet nuget, {
-	exec { NuGet push "$ModuleName.$Version.nupkg" -Source nuget.org }
+	$NuGetApiKey = Read-Host NuGetApiKey
+	exec { NuGet push "$ModuleName.$Version.nupkg" -Source nuget.org -ApiKey $NuGetApiKey }
 },
 clean
 
@@ -175,17 +176,17 @@ task pushRelease version, {
 }
 
 # Synopsis: Test current PowerShell.
-task test3 {
+task test5 {
 	Invoke-Build ** Tests
 }
 
-# Synopsis: Test PowerShell Core.
-task test6 -If $env:powershell6 {
-	exec { & $env:powershell6 -Command Invoke-Build test3 }
+# Synopsis: Test PS Core.
+task test7 {
+	exec { pwsh -Command Invoke-Build test5 }
 }
 
 # Synopsis: Test versions.
-task test test3, test6
+task test test5, test7
 
 # Synopsis: Build, test, clean.
 task . build, test, clean
