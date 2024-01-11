@@ -1,4 +1,3 @@
-
 <#
 .Synopsis
 	Clears the specified DGML file.
@@ -25,7 +24,7 @@ Import-Module Xmlips
 $xml = Read-Xml $Path
 
 # remove designer attributes Bounds, UseManualLocation, and Label=Id
-$xml | Get-Xml '//@Bounds | //@UseManualLocation | //*[@Id = @Label]/@Label' | Remove-Xml
+$xml | Get-Xml '//@Bounds | //@LabelBounds | //@UseManualLocation | //*[@Id = @Label]/@Label' | Remove-Xml
 
 # save
 Save-Xml $xml
