@@ -1,8 +1,7 @@
-*.dll
-*.suo
-*.user
-*.zip
-AssemblyInfo.cs
 bin
 obj
-Xmlips.psd1
+z
+*.htm
+*.user
+Module/*.psd1
+Src/Directory.Build.props

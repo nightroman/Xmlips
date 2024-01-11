@@ -4,29 +4,25 @@
 #>
 
 param(
-	$Configuration = 'Release',
-	$TargetFrameworkVersion = 'v4.0'
+	$Configuration = 'Release'
 )
 
+Set-StrictMode -Version 3
 $ModuleName = 'Xmlips'
 $ModuleRoot = "$env:ProgramFiles\WindowsPowerShell\Modules\$ModuleName"
 
-# Get version from release notes.
-function Get-Version {
-	switch -Regex -File Release-Notes.md {'##\s+v(\d+\.\d+\.\d+)' {return $Matches[1]} }
+# Synopsis: Remove temp files.
+task clean {
+	remove z, Src\bin, Src\obj, README.htm
 }
 
 # Synopsis: Generate meta files.
-task meta @{
-	Inputs = $BuildFile, 'Release-Notes.md'
-	Outputs = "Module\$ModuleName.psd1", 'Src\AssemblyInfo.cs'
-	Jobs = {
-		$Version = Get-Version
-		$Project = 'https://github.com/nightroman/Xmlips'
-		$Summary = 'Xmlips - XML in PowerShell'
-		$Copyright = 'Copyright (c) Roman Kuzmin'
+task meta -Inputs $BuildFile, Release-Notes.md -Outputs "Module\$ModuleName.psd1", Src\Directory.Build.props -Jobs version, {
+	$Project = 'https://github.com/nightroman/Xmlips'
+	$Summary = 'Xmlips - XML in PowerShell'
+	$Copyright = 'Copyright (c) Roman Kuzmin'
 
-		Set-Content Module\$ModuleName.psd1 @"
+	Set-Content "Module\$ModuleName.psd1" @"
 @{
 	Author = 'Roman Kuzmin'
 	ModuleVersion = '$Version'
@@ -34,9 +30,9 @@ task meta @{
 	CompanyName = '$Project'
 	Copyright = '$Copyright'
 
-	ModuleToProcess = '$ModuleName.dll'
+	RootModule = '$ModuleName.dll'
 
-	PowerShellVersion = '2.0'
+	PowerShellVersion = '5.1'
 	GUID = 'bc86e123-c8c7-4d69-bbef-fc4d068b6c05'
 
 	PrivateData = @{
@@ -44,53 +40,48 @@ task meta @{
 			Tags = 'XML', 'XPath'
 			ProjectUri = 'https://github.com/nightroman/Xmlips'
 			LicenseUri = 'http://www.apache.org/licenses/LICENSE-2.0'
-			ReleaseNotes = 'https://github.com/nightroman/Xmlips/blob/master/Release-Notes.md'
+			ReleaseNotes = 'https://github.com/nightroman/Xmlips/blob/main/Release-Notes.md'
 		}
 	}
 }
 "@
 
-		Set-Content Src\AssemblyInfo.cs @"
-using System;
-using System.Reflection;
-using System.Runtime.InteropServices;
-
-[assembly: AssemblyProduct("$ModuleName")]
-[assembly: AssemblyVersion("$Version")]
-[assembly: AssemblyTitle("$Summary")]
-[assembly: AssemblyCompany("$Project")]
-[assembly: AssemblyCopyright("$Copyright")]
-
-[assembly: ComVisible(false)]
-[assembly: CLSCompliant(false)]
+	Set-Content Src\Directory.Build.props @"
+<Project>
+	<PropertyGroup>
+		<Company>$Project</Company>
+		<Copyright>$Copyright</Copyright>
+		<Description>$Summary</Description>
+		<Product>$ModuleName</Product>
+		<Version>$Version</Version>
+		<IncludeSourceRevisionInInformationalVersion>False</IncludeSourceRevisionInInformationalVersion>
+	</PropertyGroup>
+</Project>
 "@
-	}
 }
 
-# Synopsis: Build and publish.
+# Synopsis: Build, publish in post-build, make help.
 task build meta, {
-	$MSBuild = Resolve-MSBuild
-	exec { & $MSBuild Src\$ModuleName.csproj /t:Build /p:Configuration=$Configuration /p:TargetFrameworkVersion=$TargetFrameworkVersion }
+	exec { dotnet build "Src\$ModuleName.csproj" -c $Configuration }
 },
-Help
+?help
 
-# Synopsis: Copy files to the module root.
-# It is called from the post build event.
+# Synopsis: Publish the module (post-build).
 task publish {
-	exec { robocopy Module $ModuleRoot /s /np /r:0 /xf *-Help.ps1 } (0..3)
-	Copy-Item Src\Bin\$Configuration\$ModuleName.dll $ModuleRoot
+	exec { robocopy Module $ModuleRoot /s /xf *-Help.ps1 } (0..3)
+	exec { dotnet publish Src\$ModuleName.csproj --no-build -c $Configuration -o $ModuleRoot }
+	remove $ModuleRoot\System.Management.Automation.dll, $ModuleRoot\*.deps.json
 }
 
-# Synopsis: Remove temp files.
-task clean {
-	remove z, Src\bin, Src\obj, README.htm, *.nupkg
-}
-
-# Synopsis: Build and test help by https://github.com/nightroman/Helps
-task help {
+# Synopsis: Build help by https://github.com/nightroman/Helps
+task help -Inputs @(Get-Item Src\*.cs, "Module\en-US\$ModuleName.dll-Help.ps1") -Outputs "$ModuleRoot\en-US\$ModuleName.dll-Help.xml" {
 	. Helps.ps1
-	Test-Helps Module\en-US\$ModuleName.dll-Help.ps1
-	Convert-Helps Module\en-US\$ModuleName.dll-Help.ps1 $ModuleRoot\en-US\$ModuleName.dll-Help.xml
+	Convert-Helps "Module\en-US\$ModuleName.dll-Help.ps1" $Outputs
+}
+
+# Synopsis: Set $script:Version.
+task version {
+	($script:Version = switch -Regex -File Release-Notes.md {'##\s+v(\d+\.\d+\.\d+)' {$Matches[1]; break}})
 }
 
 # Synopsis: Convert markdown to HTML.
@@ -98,70 +89,25 @@ task markdown {
 	exec { pandoc.exe README.md --output=README.htm --from=gfm --standalone --metadata=pagetitle:README }
 }
 
-# Synopsis: Set $script:Version.
-task version {
-	($script:Version = Get-Version)
-	# module version
-	assert ((Get-Module $ModuleName -ListAvailable).Version -eq ([Version]$script:Version))
-	# assembly version
-	assert ((Get-Item $ModuleRoot\$ModuleName.dll).VersionInfo.FileVersion -eq ([Version]"$script:Version.0"))
-}
+# Synopsis: Make the package.
+task package markdown, version, {
+	assert ((Get-Module $ModuleName -ListAvailable).Version -eq ([Version]$Version))
+	assert ((Get-Item $ModuleRoot\$ModuleName.dll).VersionInfo.FileVersion -eq ([Version]"$Version.0"))
 
-# Synopsis: Make the package in z\tools.
-task package markdown, {
 	remove z
-	$null = mkdir z\tools\$ModuleName\en-US
+	exec { robocopy $ModuleRoot z\$ModuleName /s /xf *.pdb } (0..3)
 
-	Copy-Item -Destination z\tools\$ModuleName $(
-		'LICENSE'
-		'README.htm'
-		"$ModuleRoot\$ModuleName.dll"
-		"$ModuleRoot\$ModuleName.psd1"
-	)
+	Copy-Item LICENSE -Destination z\$ModuleName
+	Move-Item README.htm -Destination z\$ModuleName
 
-	Copy-Item -Destination z\tools\$ModuleName\en-US $(
-		"$ModuleRoot\en-US\about_$ModuleName.help.txt"
-		"$ModuleRoot\en-US\$ModuleName.dll-Help.xml"
-	)
+	$r = (Get-ChildItem z\$ModuleName -File -Force -Recurse -Name) -join '*'
+	equals $r LICENSE*README.htm*Xmlips.dll*Xmlips.psd1*en-US\about_Xmlips.help.txt*en-US\Xmlips.dll-Help.xml
 }
-
-# Synopsis: Make NuGet package.
-task nuget package, version, {
-	$summary = 'Legacy package of the PSGallery module Xmlips.'
-
-	Set-Content z\Package.nuspec @"
-<?xml version="1.0"?>
-<package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
-	<metadata>
-		<id>$ModuleName</id>
-		<version>$Version</version>
-		<owners>Roman Kuzmin</owners>
-		<authors>Roman Kuzmin</authors>
-		<license type="expression">Apache-2.0</license>
-		<requireLicenseAcceptance>false</requireLicenseAcceptance>
-		<projectUrl>https://github.com/nightroman/Xmlips</projectUrl>
-		<summary>$summary</summary>
-		<description>$summary</description>
-		<tags>PowerShell Module XML XPath</tags>
-		<releaseNotes>https://github.com/nightroman/Xmlips/blob/master/Release-Notes.md</releaseNotes>
-	</metadata>
-</package>
-"@
-
-	exec { NuGet pack z\Package.nuspec }
-}
-
-# Synopsis: Make and push the NuGet package.
-task pushNuGet nuget, {
-	$NuGetApiKey = Read-Host NuGetApiKey
-	exec { NuGet push "$ModuleName.$Version.nupkg" -Source nuget.org -ApiKey $NuGetApiKey }
-},
-clean
 
 # Synopsis: Make and push the PSGallery package.
-task pushPSGallery package, version, {
+task pushPSGallery package, {
 	$NuGetApiKey = Read-Host NuGetApiKey
-	Publish-Module -Path z\tools\$ModuleName -NuGetApiKey $NuGetApiKey
+	Publish-Module -Path z\$ModuleName -NuGetApiKey $NuGetApiKey
 },
 clean
 
@@ -175,18 +121,21 @@ task pushRelease version, {
 	exec { git push origin "v$Version" }
 }
 
+task test_core {
+	exec { pwsh -NoProfile -Command Invoke-Build test }
+}
+
+task test_desktop {
+	exec { powershell -NoProfile -Command Invoke-Build test }
+}
+
+# Synopsis: Test PowerShell editions.
+task tests test_core, test_desktop
+
 # Synopsis: Test current PowerShell.
-task test5 {
+task test {
 	Invoke-Build ** Tests
 }
 
-# Synopsis: Test PS Core.
-task test7 {
-	exec { pwsh -Command Invoke-Build test5 }
-}
-
-# Synopsis: Test versions.
-task test test5, test7
-
-# Synopsis: Build, test, clean.
-task . build, test, clean
+# Synopsis: Build and clean.
+task . build, clean

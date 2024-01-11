@@ -88,16 +88,16 @@ task Create {
 
 task Namespace {
 	# get nodes with namespace and export
-	$namespace = @{x='http://schemas.microsoft.com/developer/msbuild/2003'}
-	[xml]$xml = Get-Content ..\Src\Xmlips.csproj
-	$r = Get-Xml '//x:Compile[starts-with(@Include, "Commands\")]' $xml -Namespace $namespace
+	$ns = @{x='http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd'}
+	[xml]$xml = Get-Content $HOME\.nuget\packages\powershellstandard.library\5.1.1\powershellstandard.library.nuspec
+	$r = Get-Xml '//x:references' $xml -Namespace $ns
 	$r | Export-Xml z.xml
 
 	# import, namespace is present
 	$r = Import-Xml z.xml
-	$r | Out-String
-	assert ($r.ChildNodes.Count -ge 8)
-	equals $r.FirstChild.xmlns http://schemas.microsoft.com/developer/msbuild/2003
+	$r.FirstChild | Out-String
+	equals $r.FirstChild.xmlns $ns.x
+	assert ($r.ChildNodes.Count -eq 1)
 
-	Remove-Item z.xml
+	remove z.xml
 }

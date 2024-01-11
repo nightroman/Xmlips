@@ -103,11 +103,11 @@ task XmlAndSigle {
 }
 
 task Namespace {
-	$namespace = @{x='http://schemas.microsoft.com/developer/msbuild/2003'}
-	[xml]$xml = Get-Content ..\Src\Xmlips.csproj
-	$x = 'AssemblyInfo.cs'
-	$r = Get-Xml '//x:Compile[@Include = $x]' $xml -Namespace $namespace
-	equals $r.Include $x
+	$ns = @{x='http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd'}
+	[xml]$xml = Get-Content $HOME\.nuget\packages\powershellstandard.library\5.1.1\powershellstandard.library.nuspec
+	$x = 'System.Management.Automation.dll'
+	$r = Get-Xml '//x:*[@file = $x]' $xml -Namespace $ns
+	equals $r.file $x
 }
 
 task Property {
@@ -228,7 +228,7 @@ task _160102_013934 {
 
 # The actual and documented type is XmlNode. But the specified type must be
 # XmlElement, for better code completion.
-task OutputType -If ($PSVersion -ge 5) {
+task OutputType {
 	$command = Get-Command Get-Xml -CommandType Cmdlet
 	equals System.Xml.XmlElement $command.OutputType.Name
 }

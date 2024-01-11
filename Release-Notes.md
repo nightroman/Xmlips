@@ -1,5 +1,11 @@
 # Xmlips Release Notes
 
+## v2.0.0
+
+- Designed for Windows PowerShell 5.1 and PowerShell Core
+- Built with PowerShellStandard.Library
+- Published at PSGallery only
+
 ## v1.0.2
 
 Maintenance.
